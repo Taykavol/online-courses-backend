@@ -1,0 +1,25 @@
+
+GET http://localhost:3000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjFtdmt2b2wyMzVkczg5QHlhbmRleC5ydSIsImlhdCI6MTU5NTQ3MTExMH0.CIuyIUiVkSvsy4Q4Yfaz-giN_jIjrb1q_df3WK2bBl0
+### 
+GET http://localhost:3000/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5vbmFtZUB5YW5kZXgucnUiLCJpYXQiOjE1OTU0NzMzNjh9.ZStzrHIba80j4Ox7FrW7opTKdpUt9-BmalJ-gQ9Bwr0
+
+### 
+POST http://localhost:3000/signup
+Content-Type: application/json
+
+{
+    "password":"35243524",
+    "email":"noname@yandex.ru"
+}
+
+
+###
+POST http://localhost:3000/login 
+Content-Type: application/json
+
+{
+    "password":"35243524",
+    "email":"noname@yandex.ru"
+}
