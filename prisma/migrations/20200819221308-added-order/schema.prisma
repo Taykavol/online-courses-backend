@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -27,28 +27,19 @@ model instructorProfile{
   teacherName String?
   title Title?
   myCourses Course[]
-  orders Order[]
   // paypalId String?
 }
 model BoughtCourse {
   id Int @default(autoincrement()) @id
-  user User @relation(fields: [userId],references:[id])
-  userId Int
-  course Course @relation(fields: [courseId],references:[id])
-  courseId Int
-  progress Int @default(0)
-  lastSeen DateTime @default(now())
+  user User? @relation(fields: [userId],references:[id])
+  userId Int?
+  order Order? @relation(fields: [orderId],references:[id])
+  orderId Int?
 }
 model Order {
   id Int @default(autoincrement()) @id
   price Float
-  course Course @relation(fields: [courseId],references:[id])
-  courseId Int
-  buyer User @relation(fields: [buyerId],references:[id])
-  buyerId Int
-  seller instructorProfile @relation(fields: [sellerId],references:[id])
-  sellerId Int
-  createdAt DateTime @default(now())
+  course BoughtCourse
 }
 
 model Course {

@@ -1,0 +1,17 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Curriculum",
+      "field": "course",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Curriculum",
+      "field": "courseID",
+      "arity": "Optional"
+    }
+  ]
+}

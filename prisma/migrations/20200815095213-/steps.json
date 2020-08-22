@@ -1,0 +1,268 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteModel",
+      "model": "Curriculum"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "Chapter"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "Comment"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "Lesson"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "Video"
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "Puzzle"
+    },
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "lichessId",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "User",
+          "field": "lichessId"
+        },
+        "directive": "unique"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "isBanned",
+      "type": "Boolean",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "User",
+          "field": "isBanned"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "User",
+          "field": "isBanned"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "false"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "publicName"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "lichessID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "googleID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "facebookID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "User",
+      "field": "banned"
+    },
+    {
+      "tag": "CreateField",
+      "model": "instructorProfile",
+      "field": "userId",
+      "type": "Int",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "instructorProfile",
+      "field": "userID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "instructorProfile",
+      "field": "paypalID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "instructorProfile",
+      "field": "bitcoinAdress"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "instructorProfile",
+      "field": "income"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "instructorProfile",
+      "field": "user",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "instructorProfile",
+          "field": "user"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[userId]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Course",
+      "field": "authorId",
+      "type": "Int",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "authorID"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "price"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "priceSale"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "picture"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "averageRating"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "comments"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "totalPurchase"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "totalRevenue"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "forSearchEngines"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "name"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "newValue": "\"\""
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Course",
+      "field": "author",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "author"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "newValue": "[authorId]"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "description"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "description"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "\"\""
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Course",
+      "field": "curriculum",
+      "type": "Json"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Course",
+      "field": "curriculum",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Chapter",
+      "field": "name",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Lesson",
+      "field": "name",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Lesson",
+      "field": "video",
+      "arity": "Optional"
+    }
+  ]
+}

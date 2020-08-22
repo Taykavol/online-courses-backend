@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -16,7 +16,7 @@ model User {
   email   String?   @unique
   password String?
   lichessId String? @unique
-  boughtCourses BoughtCourse[] 
+  boughtCourses Course[] @relation(references: [id])
   isBanned Boolean @default(false)
   instructorProfile instructorProfile? 
 }
@@ -27,47 +27,23 @@ model instructorProfile{
   teacherName String?
   title Title?
   myCourses Course[]
-  orders Order[]
   // paypalId String?
-}
-model BoughtCourse {
-  id Int @default(autoincrement()) @id
-  user User @relation(fields: [userId],references:[id])
-  userId Int
-  course Course @relation(fields: [courseId],references:[id])
-  courseId Int
-  progress Int @default(0)
-  lastSeen DateTime @default(now())
-}
-model Order {
-  id Int @default(autoincrement()) @id
-  price Float
-  course Course @relation(fields: [courseId],references:[id])
-  courseId Int
-  buyer User @relation(fields: [buyerId],references:[id])
-  buyerId Int
-  seller instructorProfile @relation(fields: [sellerId],references:[id])
-  sellerId Int
-  createdAt DateTime @default(now())
 }
 
 model Course {
 id Int @default(autoincrement()) @id
-title String @default("")
-subtitle String @default("")
+name String? @default("")
 author instructorProfile? @relation(fields: [authorId],references:[id])
 authorId Int?
 description String? @default("")
-category Category @default(Basics)
-level String @default("1500 2000")
+category String?
+level String?
 status Status? @default(BUILDING)
-registedStudents User[] 
-lessons Int?
-duration Int?
-price Float @default(20)
+registedStudents User[] @relation(references: [id])
+price Float @default(9.99)
 // picture String?
 // averageRating Float @default(0)
-curriculum String?
+curriculum Json?
 // totalPurchase Int @default(0)
 // totalRevenue Float @default(0)
 // forSearchEngines Float @default(0)
@@ -127,13 +103,7 @@ createdAt DateTime @default(now())
 //   moves String[]
 //   helps String[]
 // }
-enum Category {
-  Openings
-  Middlegame
-  Endgame
-  Games
-  Basics
-} 
+
 enum Status {
 BUILDING
 VERIFYING
@@ -150,7 +120,6 @@ enum Title {
 }
 enum Role {
   ADMIN
-  TEACHER
   USER
 }
 

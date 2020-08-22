@@ -1,0 +1,20 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "DeleteField",
+      "model": "Course",
+      "field": "curriculum"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Curriculum",
+      "field": "course"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Curriculum",
+      "field": "courseID"
+    }
+  ]
+}

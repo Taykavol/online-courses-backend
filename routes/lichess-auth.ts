@@ -1,4 +1,8 @@
 import { Router } from "express";
+import jwt from "jsonwebtoken"
+import {PrismaClient} from "@prisma/client"
+
+const prisma = new PrismaClient()
 const simpleOauth = require('simple-oauth2');
 const axios = require('axios');
 
@@ -11,15 +15,7 @@ const axios = require('axios');
 const port = 3000;
 const clientId = 'IKGglix7XImcYLPc';
 const clientSecret = '43nbT0LBFw3UGjUy2eNrPOzWv07Vg0zF';
-const redirectUri = `http://localhost:${port}/lichess/callback`;
-// uncomment the scopes you need
-// list of scopes: https://lichess.org/api#section/Authentication
-const scopes = [
-    "email:read"
-  // 'preference:read',
-  // 'challenge:read',
-  ];
-/* --- End of your app config --- */
+const redirectUri = `http://localhost:${port}/test`;
 
 /* --- Lichess config --- */
 const tokenHost = 'https://oauth.lichess.org';
@@ -39,48 +35,76 @@ const oauth2 = simpleOauth.create({
   },
 });
 
-const state = Math.random().toString(36).substring(2);
-const authorizationUri = `${tokenHost}${authorizePath}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join('%20')}&state=${state}`;
 
 const app = Router();
-
-// Show the "log in with lichess" button
-app.get('/', (req, res) => res.send('Hello<br><a href="auth">Log in with lichess</a>'));
-
-// Initial page redirecting to Lichess
-app.get('/auth', (req, res) => {
-  console.log(authorizationUri);
-  res.redirect(authorizationUri);
-});
 
 // Redirect URI: parse the authorization token and ask for the access token
 app.get('/callback', async (req, res) => {
   try {
+    console.log(req.query.code)
     const result = await oauth2.authorizationCode.getToken({
       code: req.query.code,
       redirect_uri: redirectUri
     });
-    console.log(result);
+    console.log('res',result);
     const token = oauth2.accessToken.create(result);
     const userInfo = await getUserInfo(token.token);
     const userEmail = await getUserEmail(token.token);
     const email = userEmail.data.email
-    const title = userInfo.data.title
-res.app.set('yoy', 'sdfsdf')
-    res.redirect('/?email='+email)
-    // res.redirect('/')
-    // console.log(email,title)
-    // console.log(userEmail.data.email)
-    // res.send()
-    // const {email} = userInfo.email
-    // console.log(userInfo.email)
-    // res.send(`<h1>Success!</h1>Your lichess user info: <pre>${JSON.stringify(userInfo.data)}</pre>`);
+    const data = userInfo.data
+    console.log(data)
+    const {title, id} = data
+    console.log('id',id)
+    console.log('title',title)
+    const user = await prisma.user.findOne({
+      where:{
+        lichessId:id 
+      }
+    })
+    if(!user) {
+      let newUser
+      if(title=="GM"||title=="IM"||title=="WGM"||title=="WIM") {
+         newUser = await prisma.user.create({
+          data:{
+            lichessId:id,
+            role:"TEACHER",
+            instructorProfile:{
+              create:{
+                title
+              }
+            }
+          }
+        })
+        const tokenApp=jwt.sign({
+          id:newUser.id,
+          role:"USER"
+        },'secret')
+        return res.json({email,role:"TEACHER", token:tokenApp})
+      } else {
+         newUser = await prisma.user.create({
+          data:{
+            lichessId:id
+          },
+        })
+        const tokenApp=jwt.sign({
+          id:newUser.id,
+          role:"USER"
+        },'secret')
+        return res.json({email,role:"USER", token:tokenApp})
+      } 
+      
+    }
+    const tokenApp=jwt.sign({
+      id:user.id,
+      role:user.role
+    },'secret')
+    res.json({email, role:user.role,title, token:tokenApp})
+
   } catch(error) {
     console.error('Access Token Error', error.message);
     res.status(500).json('Authentication failed');
   }
 });
-
 
 function getUserInfo(token) {
   return axios.get('/api/account', {

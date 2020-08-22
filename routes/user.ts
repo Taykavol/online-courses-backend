@@ -2,11 +2,15 @@ import { Router } from "express";
 import {PrismaClient} from "@prisma/client"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import {isAuth, isAdmin} from '../utils/auth'
 
 //for extending classes
 import { Request } from "express"
 export interface IGetUserAuthInfoRequest extends Request {
-  user: Object // or any other type
+  user: {
+    id,
+    role
+  } // or any other type
 }
 
 
@@ -14,70 +18,79 @@ const app = Router();
 
 const prisma = new PrismaClient()
 
-app.get('/users',isAuth, async(req,res)=>{  
+app.get('/users',isAuth,isAdmin, async(req,res)=>{  
     const users = await prisma.user.findMany()
     res.json(users)
 })
 
-app.get('/me', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
-  const user = req.user
-  res.json(user)
-})
+// app.get('/me', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
+//   const {id} = req.user
+//   if(!id) return res.send('userWasDeleted')
+//   const user = await prisma.user.findOne({
+//     where:{
+//       id
+//     },
+//     include:{
+//       boughtCourses:{
+//         orderBy:{
+//           createdAt:'desc'
+//         }
+//       }
+//     }
+//   })
+//   res.json(user)
+// })
 
 app.post("/login",async (req,res)=>{
   const { email, password } = req.body;
-  if(!email || !password) return res.send('Info not enough')
+  if(!email || !password) return res.json('Info not enough')
   const user = await prisma.user.findOne({
-    where:{
+    where: {
       email
     }
   })
-  if(!user) return res.send('There is no users')
+  if(!user) return res.json('There is no users')
+  const id = user.id
+  const role = user.role
+  console.log(role)
   const isMatch = await bcrypt.compare(password,user.password)
   console.log(isMatch)
-  if(!isMatch) return res.send('Password incorrect')
-  const token=jwt.sign({email},'secret')
-  res.json(token)
+  if(!isMatch) return res.json('Password incorrect')
+  const token=jwt.sign({id,role},'secret')
+  res.json({token, user:{role,email}})
   
 })
 
 app.post("/signup", async (req, res) => {
   const { email, password } = req.body;
-  if(!email || !password) return res.send('Info not enough')
+  console.log(email,password)
+  if(!email || !password) return res.json('Info not enough')
   const isUserExist = await prisma.user.findOne({
     where:{
-      email
+     email
     }
   })
-  console.log(isUserExist)
-  if(isUserExist) return res.send('User with this email exists')
+  if(isUserExist) return res.json('User with this email exists')
   const hashedPassword =await bcrypt.hash(password,10)
 
-  const user = await prisma.user.create({
+  const {id,role} = await prisma.user.create({
     data: {
       email,
-      password:hashedPassword
+      password:hashedPassword,
+      role:"USER"
     }
   })
   
   const token=jwt.sign({
-    email
+    id,
+    role
   },'secret')
 
-  res.json(token)
+  res.json({token, user:{role:"USER",email}})
 
 });
 
 
-function isAuth(req,res,next) {
-  
-  const token =req.headers.authorization && req.headers.authorization.split(' ')[1]
-  if (!token) return res.send('Missing token')
-  jwt.verify(token, 'secret',(error,user)=>{
-    if(error) return res.send(error)
-    req.user = user
-    next()
-  })
-}
+
 
 export default app;

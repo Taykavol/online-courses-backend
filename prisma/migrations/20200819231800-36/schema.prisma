@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -27,7 +27,6 @@ model instructorProfile{
   teacherName String?
   title Title?
   myCourses Course[]
-  orders Order[]
   // paypalId String?
 }
 model BoughtCourse {

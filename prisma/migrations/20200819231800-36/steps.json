@@ -1,0 +1,29 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "BoughtCourse",
+      "field": "user",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "BoughtCourse",
+      "field": "userId",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "BoughtCourse",
+      "field": "course",
+      "arity": "Required"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "BoughtCourse",
+      "field": "courseId",
+      "arity": "Required"
+    }
+  ]
+}
