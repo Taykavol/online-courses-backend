@@ -3,4 +3,4 @@ GET http://localhost:4000/boughtcourse/all
 
 ###
 POST http://localhost:4000/boughtcourse/7
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Niwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE1OTc4NjAxNDB9.zugU3kYvDMG2FaOubd2XCQf0ulwS7PkRJtjAZ-PTLmI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sZSI6IlVTRVIiLCJpYXQiOjE1OTg0ODMzNTV9.d0epdo8ZZWvRWFUTcfCFwJFfNFSlnNxHFqnY4vdrrbw

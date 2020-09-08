@@ -19,7 +19,27 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
             id:req.user.id
         },
         include:{
-            boughtCourses:true
+            boughtCourses:{
+                select:{
+                    course:{
+                        select:{
+                            title:true,
+                            subtitle:true,
+                            category:true,
+                            lessons:true,
+                            duration:true,
+                            author:{
+                                select:{
+                                    teacherName:true,
+                                    title:true
+                                }
+                            }
+                        }
+                    },
+                    progress:true,
+                    
+                }
+            }
         }
     })
     if(!user) return res.json('User not found')

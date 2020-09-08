@@ -1,12 +1,27 @@
 import { Router } from 'express'
-import data from '../utils/data'
-import course from '../utils/data';
+import {PrismaClient} from "@prisma/client"
+import {isAuth, isAdmin} from '../utils/auth'
+import { Request } from "express"
+export interface IGetUserAuthInfoRequest extends Request {
+  user: {
+    id,
+    role
+  } // or any other type
+}
+
 const app = Router()
+const prisma = new PrismaClient()
+
 var Vimeo = require('vimeo').Vimeo;
 var client = new Vimeo("32d615dc4ca483e433a4bf76192475102dcee8c0", "lNFDTgMihkuv/mrQURmHCtREg4hLqo6K976Gycmv49AC8MY/BhAv5ojdWl1kUbHrWsYwNYSiVqShTmDvrXBS0hc7GgVR3g8Wmpg6coJC8x0Hv07kS21n6g92X+5VJuXS", "8969d11029edcd376c506f0bc444149b");
 
-// Delete video on vimeo via lesson id only admin
-
+app.post('/create',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
+//  const user = await prisma.instructorProfile.findOne({
+//    where:{
+     
+//    }
+//  }) 
+})
 app.delete('/:vimeoId', (req,res)=>{
   //  Only admin can do
     client.request({
