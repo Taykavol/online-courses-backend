@@ -1,0 +1,9 @@
+GET http://chess-courses.hb.bizmrg.com/course/unsplash-kiss.jpg 
+# Authorization: AWS tY84Us6MfPsuZYq1c6w6Tj:hDU7G89AjStJr2WHjbinHhcVTwXuU8gEyAUR5VZKdvSz
+# Date:Wed, 30 Sep 2020 16:13:00 +0000
+### 
+GET http://chess-courses.hb.bizmrg.com/private/unsplash-kiss.jpg
+Authorization: AWS 5dF333vaGAjeQb7uD4NEN3:9Qw4zdM1RMHLCSr87wZjsMopTHCgHQtbvYRtnfGyx6wg
+Date:Wed, 30 Sep 2020 13:18:00 GMT
+Content-type: image/jpeg 
+Authorization: Basic base64-user-password

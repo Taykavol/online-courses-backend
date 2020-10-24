@@ -59,6 +59,18 @@ app.get('/callback', async (req, res) => {
     const user = await prisma.user.findOne({
       where:{
         lichessId:id 
+      },
+      include:{
+        instructorProfile:{
+          select:{
+            id:true
+          }
+        },
+        boughtCourses:{
+          select:{
+            courseId:true
+          }
+        }
       }
     })
     if(!user) {
@@ -73,17 +85,27 @@ app.get('/callback', async (req, res) => {
                 title
               }
             }
+          },
+          select:{
+            id:true,
+            instructorProfile:{
+              select:{
+                id:true
+              }
+            }
           }
         })
         const tokenApp=jwt.sign({
           id:newUser.id,
-          role:"USER"
+          role:"TEACHER",
+          instructorId:newUser.instructorProfile.id
         },'secret')
         return res.json({email,role:"TEACHER", token:tokenApp})
       } else {
          newUser = await prisma.user.create({
           data:{
-            lichessId:id
+            lichessId:id,
+            role:"USER"
           },
         })
         const tokenApp=jwt.sign({
@@ -96,9 +118,10 @@ app.get('/callback', async (req, res) => {
     }
     const tokenApp=jwt.sign({
       id:user.id,
-      role:user.role
+      role:user.role,
+      instructorId:user.instructorProfile?user.instructorProfile.id:null
     },'secret')
-    res.json({email, role:user.role,title, token:tokenApp})
+    res.json({email, role:user.role,title, token:tokenApp, courses:user.boughtCourses})
 
   } catch(error) {
     console.error('Access Token Error', error.message);

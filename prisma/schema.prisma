@@ -8,6 +8,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["atomicNumberOperations"]
 }
 
 model User {
@@ -19,6 +20,7 @@ model User {
   boughtCourses BoughtCourse[] 
   isBanned Boolean @default(false)
   instructorProfile instructorProfile? 
+  
 }
 model instructorProfile{
   id Int @default(autoincrement()) @id
@@ -28,7 +30,13 @@ model instructorProfile{
   title Title?
   myCourses Course[]
   orders Order[]
-  videos String[]
+  profit Float @default(0.5)
+  invoices Invoice[]
+  avatar String?
+  aboutMe String?
+  publishedCourses Int @default(0)
+  registedStudents Int @default(0)
+  // videos String[]
   // paypalId String?
 }
 model BoughtCourse {
@@ -37,8 +45,13 @@ model BoughtCourse {
   userId Int
   course Course @relation(fields: [courseId],references:[id])
   courseId Int
-  progress Int @default(2)
+  progress Int @default(0)
   lastSeen DateTime @default(now())
+  review Review? @relation(fields: [reviewId], references:[id])
+  reviewId Int?
+  
+  @@unique([userId,courseId])
+  // reviewMessage String?
 }
 model Order {
   id Int @default(autoincrement()) @id
@@ -51,6 +64,17 @@ model Order {
   sellerId Int
   createdAt DateTime @default(now())
 }
+model Invoice {
+  id Int @default(autoincrement()) @id
+  month Int
+  year Int 
+  profile instructorProfile @relation( fields:[profileId], references:[id])
+  profileId Int
+  status InvoiceStatus @default(PENDING)
+  total Float @default(0)
+  createdAt DateTime @default(now())
+  @@unique([month,year,profileId])
+}
 
 model Course {
 id Int @default(autoincrement()) @id
@@ -59,20 +83,38 @@ subtitle String @default("")
 author instructorProfile? @relation(fields: [authorId],references:[id])
 authorId Int?
 description String? @default("")
-category Category @default(Basics)
-level String @default("1500 2000")
+category Category @default(BASICS)
+level Level @default(BASIC)
 status Status? @default(BUILDING)
-registedStudents User[] 
+videos String[]
+registedStudents Int @default(0)
 lessons Int?
-duration Int?
+duration Int? @default(0)
 price Float @default(20)
-// picture String?
+orders Order[]
+pictureUri String?
+promoVideo String?
+totalPuzzles Int @default(0)
 // averageRating Float @default(0)
+reviewStats Int[]
+// numberReviews Int @default(0)
 curriculum String?
+reviews Review[]
 // totalPurchase Int @default(0)
 // totalRevenue Float @default(0)
 // forSearchEngines Float @default(0)
 createdAt DateTime @default(now()) 
+}
+
+model Review {
+  id Int @default(autoincrement()) @id
+  boughtCourse BoughtCourse 
+  course Course @relation(fields: [courseId],references:[id])
+  courseId Int
+  review Int 
+  reviewMessage String?
+  reviewSubtitle String?
+  authorName String?
 }
 
 // model Curriculum {
@@ -128,18 +170,28 @@ createdAt DateTime @default(now())
 //   moves String[]
 //   helps String[]
 // }
+enum InvoiceStatus {
+  PAYOUT
+  PENDING
+}
 enum Category {
-  Openings
-  Middlegame
-  Endgame
-  Games
-  Basics
+  OPENINGS
+  MIDDLEGAME
+  ENDGAME
+  GAMES
+  BASICS
 } 
 enum Status {
 BUILDING
 VERIFYING
 PUBLISH
 UNPUBLISH
+}
+enum Level {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+  PROFESSIONAL
 }
 
 enum Title {

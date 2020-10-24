@@ -1,102 +1,406 @@
 import {Request,Router } from 'express'
 import {v4 as uuidv4} from 'uuid'
-import {PrismaClient} from "@prisma/client"
-import {isAuth, isAdmin} from '../utils/auth'
+import {PrismaClient} from "@prisma/client" 
+import {isAuth, isInstructor} from '../permissions/auth'
+import AWS from "aws-sdk";
+// const AWS = require('aws-sdk');
+
+// import { s3 } from "aws-sdk";
+
+import multer from 'multer'
+
+const fileStorage = multer.diskStorage({
+    destination(req,file,cb) {
+        cb(null,'public/images/course')
+    },
+    filename(req,file,cb) {
+        cb(null,file.fieldname+req.params.id+'.jpg')
+    }
+})
+
+var storage = multer.memoryStorage()
+const upload2 = multer({ storage: storage }).single('image')
+const upload = multer({ storage: fileStorage }).single('image')
+
+
+const { promisify } = require("util");
+const redis = require('redis')
+const redisUrl = 'redis://localhost:6379'
+const clientRedis = redis.createClient(redisUrl)
+clientRedis.get = promisify(clientRedis.get)
+// import redis from 'redis'
+// const { promisify } = require("util");
+// const redisUrl = 'redis://localhost:6379'
+// const client = redis.createClient(redisUrl)
 
 const app = Router()
 
 export interface IGetUserAuthInfoRequest extends Request {
     user: {
-      id
+      id,
+      instructorId
     },
-    course // or any other type,
+    course,
   }
   
 const prisma = new PrismaClient()
-// app.get('/course', (req,res)=>{
-//     res.json(data)
-// })
-app.post('/create',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
-    const user = await prisma.user.findOne({
-        where:{
-            id:req.user.id
-        },
+prisma.$use(async (params, next) => {
+    const before = Date.now();
+    const result = await next(params);
+    const after = Date.now();
+    console.log(
+      `Query ${params.model}.${params.action} took ${after - before}ms`
+    );
+    return result;
+  });
+//Get all published course for main page
+app.get('/published', async(req,res)=>{
+    console.log(req.path)
+    
+    // client.set('chess','noname',console.log)
+    
+    // prisma.$use(async (params, next)=>{
+    //  clientRedis.flushall()
+
+      const redisCourse = await clientRedis.get(req.path)
+      if(redisCourse) {
+        console.log('FROM REDIS')
+        const course:JSON = JSON.parse(redisCourse)
+        return res.json(course)
+      } 
+      console.log('FROM DB')
+
+    const courses = await prisma.course.findMany({
         include:{
-            instructorProfile:{
+            author:{
                 select:{
-                    id:true
+                    teacherName:true,
+                    title:true,
+                    aboutMe:true,
+                    avatar:true,
+                    registedStudents:true,
+                    publishedCourses:true,
                 }
             }
         }
     })
-    if(!user.instructorProfile) return res.json('You are not teacher')
-    const curriculum = [{id:uuidv4(),name:"",order:0,lessons:[{order:0,id:uuidv4(),name:"",description:"",video:{duration:0},puzzles:[]}]}]
+    // clientRedis.flushall()
+    
+    res.json(courses) 
+    clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
+    
+    // res.json(courses) 
+    // client.set('courses', JSON.stringify(courses))
+})
+
+app.get('/newest', async (req,res)=>{
+    const redisCourse = await clientRedis.get(req.path)
+      if(redisCourse) {
+        console.log('FROM REDIS')
+        const course:JSON = JSON.parse(redisCourse)
+        return res.json(course)
+      } 
+    const courses = await prisma.course.findMany({
+        take:7
+    })
+    res.json(courses)
+    clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
+
+})
+
+app.get('/top', async (req,res)=>{
+    const courses = await prisma.course.findMany({
+        take:6
+    })
+    res.json(courses)
+})
+app.get('/recommended', async (req,res)=>{
+    const courses = await prisma.course.findMany({
+        take:2
+    })
+    res.json(courses)
+})
+//Get list of courses
+app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+    //  clientRedis.flushall()
+
+    const courses = await clientRedis.get(`myCourses${req.user.instructorId}`)
+    if(courses)  {
+        console.log('FROM REDIS')
+        return res.json(JSON.parse(courses))
+    }
+    const myCourses = await prisma.course.findMany({
+       where:{
+            authorId:req.user.instructorId
+       }
+    }) 
+
+    res.json(myCourses)
+    clientRedis.set(`myCourses${req.user.instructorId}`,JSON.stringify(myCourses),'EX', 10)
+})
+//Get specific course
+app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+    const redisCourse = await clientRedis.get(`${req.params.id}myCourse${req.user.instructorId}`)
+    if(redisCourse) {
+        console.log('FROM REDIS')
+        return res.json(JSON.parse(redisCourse)) 
+    }
+    const course  = await prisma.course.findOne({
+        where:{
+            id:+req.params.id
+        }
+    })
+    if(!course) return res.json('Course not found')
+    if(course.authorId!=req.user.instructorId) return res.json('You are not owner')
+    res.json(course)
+    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
+
+})
+// Get preview (public, for all)
+app.get('/:id/preview',async(req,res)=>{
+    console.log(req.path)
+    const redisCourse = await clientRedis.get(req.path)
+      if(redisCourse) {
+        console.log('FROM REDIS')
+        const course:JSON = JSON.parse(redisCourse)
+        return res.json(course)
+      } 
+    // const redisCourse = await clientRedis.get(`coursePreview${req.params.id}`)
+    // if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     return res.json(JSON.parse(redisCourse)) 
+    // }
+    const course = await prisma.course.findOne({
+        where:{
+            id:+req.params.id
+        },
+        include:{
+            // reviews:{
+            //     select:{
+            //         review:true,
+            //         reviewMessage:true,
+            //         reviewSubtitle:true,
+            //         authorName:true
+            //     }
+            // },
+            author:{
+                select:{
+                    teacherName:true,
+                    title:true,
+                    registedStudents:true,
+                    publishedCourses:true,
+                    aboutMe:true,
+                    avatar:true
+                },
+            }
+        },
+
+    })
+    res.json(course)
+    clientRedis.set(req.path, JSON.stringify(course),'EX',10)
+
+    // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
+
+})
+
+app.get('/:id/review', async(req,res)=>{
+    const reviews = await prisma.review.findMany({
+        where:{
+            courseId:+req.params.id
+        }
+    })
+    res.json(reviews)
+})
+// Create course
+app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+    if(!req.user.instructorId) return res.json('You are not teacher')
+    const curriculum = [{id:uuidv4(),name:"",order:0,lessons:[{order:"0",id:uuidv4(),name:"",description:"",video:{duration:"0"},puzzles:[]}]}]
     const course = await prisma.course.create({
         data:{
             author:{
                 connect:{
-                    id:user.instructorProfile.id
+                    id:req.user.instructorId
                 }
             },
-            curriculum: JSON.stringify(curriculum)
+            curriculum: JSON.stringify(curriculum),
+            reviewStats:{
+                set:[0,0,0,0,0]
+            }
         },        
     })
     res.json(course)
-    // if(course) return res.json('Course not found')
-
 })
-app.get('/all',isAuth,async (req:IGetUserAuthInfoRequest,res)=>{
-    const user = await prisma.user.findOne({
-        where:{
-            id:+req.user.id
-        },
-        include:{
-            instructorProfile:{
-                include:{
-                    myCourses:true
-                }
-            }
-        }
-    })
-    if(!user.instructorProfile) return res.json('You are not teacher')
-    res.json(user.instructorProfile.myCourses)
-})
-app.get('/:id', isAuth,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
-    res.json(req.course)
-})
-
-app.put('/:id',isAuth,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
-    let {curriculum,lessons,duration} = req.body
+// Update curriculum
+app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
+    
+    let {curriculum,lessons,duration,totalPuzzles} = req.body
+    // console.log(curriculum)
+    // curriculum=JSON.stringify(curriculum)
     duration= Math.floor(duration)
-    console.log(lessons)
-    console.log(typeof(curriculum))
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
         },
         data:{
-            curriculum:JSON.stringify(curriculum),
-            lessons,
-            duration
+            curriculum:{
+                set:curriculum
+            },
+            // curriculum,
+            lessons:{
+                set:lessons
+            },
+            duration:{
+                set:duration
+            },
+            totalPuzzles:{
+                set:totalPuzzles
+            }
         }
     }) 
-    res.json(updatedCourse)
+    res.json('Ok')
+    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
     
 })
 
-app.patch('/:id',isAuth,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
+app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
+
+    // var storage = multer.memoryStorage()
+    // const {size,file} = req.body
+    console.log('Sizer',req.file)
+    // const AWS = require("aws-sdk");
+
+    AWS.config.loadFromPath('./utils/aws/config.json')
+    const s3 = new AWS.S3({})
+
+    if(req.course.pictureUri)  {
+        console.log(req.course.pictureUri)
+            s3.deleteObject({
+                Bucket: "chess-courses",
+                Key:req.course.pictureUri
+            },(err,data)=>{
+                console.log(err)
+                console.log('was deleted')
+                console.log(data)
+            })
+    }
+    const AWSKey = `course/${uuidv4()}image${req.params.id}.jpg`
+    s3.putObject({
+        Body: req.file.buffer,
+        Bucket: "chess-courses",
+        Key: AWSKey,
+        ContentType:"image/jpeg",
+        ACL: 'public-read',
+        CacheControl:"max-age=2628000"
+     }, async function(err, data){
+        if (err) throw err; // an error occurred
+        else  {
+            await prisma.course.update({
+                where:{
+                    id:+req.params.id
+                },
+                data:{
+                  pictureUri:{
+                      set:AWSKey
+                  }
+                }
+            })
+            res.send("ok");
+
+        }           // successful response
+     })
+})
+
+
+app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
+
+    // var storage = multer.memoryStorage()
+    // const {size,file} = req.body
+    console.log('Sizer',req.file)
+    // const AWS = require("aws-sdk");
+
+    AWS.config.loadFromPath('./utils/aws/config.json')
+    const s3 = new AWS.S3({})
+    const teacher = await prisma.instructorProfile.findOne({
+        where:{
+            id:req.user.instructorId
+        },
+        select:{
+            avatar:true
+        }
+    })
+    if(teacher.avatar)  {
+        // console.log(req.course.pictureUri)
+            s3.deleteObject({
+                Bucket: "chess-courses",
+                Key:teacher.avatar
+            },(err,data)=>{
+                console.log(err)
+                console.log('was deleted')
+                console.log(data)
+            })
+    }
+    const AWSKey = `teacher/${uuidv4()}image${req.user.instructorId}.jpg`
+    s3.putObject({
+        Body: req.file.buffer,
+        Bucket: "chess-courses",
+        Key: AWSKey,
+        ContentType:"image/jpeg",
+        ACL: 'public-read',
+        CacheControl:"max-age=2628000"
+     }, async function(err, data){
+        if (err) throw err; // an error occurred
+        else  {
+            await prisma.instructorProfile.update({
+                where:{
+                    id:req.user.instructorId
+                },
+                data:{
+                    avatar: {
+                        set:AWSKey
+                    }
+                }
+            })
+            res.send("ok");
+
+        }           // successful response
+     })
+})
+// Update course info
+app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
+    
     let {title,subtitle,description,category,level,price} = req.body
-    // let data= req.body
+    console.log(title,subtitle,description,category,level,price)
+    // let imageUrl
+    // if(req.file)
+    // imageUrl = req.file.path
+    // console.log(imageUrl)
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
         },
         data:{
-            title,subtitle,description,category,level,price
+            title:{
+                set:title
+            },
+            subtitle:{
+                set:subtitle
+            },
+            description:{
+                set:description
+            },
+            category:{
+                set:category
+            },
+            level:{
+                set:level
+            },
+            price:{
+                set:+price
+            }
         }
     })
-    console.log(req.body)
-    res.json(updatedCourse)
+    res.json('Ok')
+    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
 })
 
 async function isCourseOwner(req,res,next) {
@@ -104,16 +408,13 @@ async function isCourseOwner(req,res,next) {
         where:{
             id:+req.params.id
         },
-        include:{
-            author:{
-                select:{
-                    userId:true
-                }
-            }
+        select:{
+            authorId:true,
+            pictureUri:true
         }
     })
     if(!course) return res.json('Course not found')
-    if(course.author.userId!=req.user.id) return res.json('You are not owner')
+    if(course.authorId!=req.user.instructorId) return res.json('You are not owner')
     req.course=course
     next()
 } 

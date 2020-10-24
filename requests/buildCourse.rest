@@ -1,0 +1,9 @@
+###
+GET http://localhost:4000/buildcourse/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVTRVIiLCJpYXQiOjE1OTc0OTU1MjF9.AlI9-w8Zs78VN6a27y7G8k7gZRq6fau145o9CbFHqf8
+
+###
+POST http://localhost:4000/buildcourse/create
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IlVTRVIiLCJpYXQiOjE1OTc0OTU1MjF9.AlI9-w8Zs78VN6a27y7G8k7gZRq6fau145o9CbFHqf8
+### 
+DELETE http://localhost:4000/video/446238668

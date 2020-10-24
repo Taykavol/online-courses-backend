@@ -1,0 +1,42 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateEnum",
+      "enum": "Level",
+      "values": [
+        "BASIC",
+        "INTERMEDIATE",
+        "ADVANCED",
+        "PROFESSIONAL"
+      ]
+    },
+    {
+      "tag": "CreateField",
+      "model": "Course",
+      "field": "promoVideo",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Course",
+      "field": "level",
+      "type": "Level"
+    },
+    {
+      "tag": "UpdateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "level"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "newValue": "BASIC"
+    }
+  ]
+}
