@@ -4,10 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc && npm run start",
+    "start": "node dist/index.js",
     "dev": "nodemon index.ts",
-    "start": "ts-node index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "git add . && git commit -m Heroku && git push heroku master"
   },
+  "engines": { "node": "12.14.1" },
   "keywords": [],
   "author": "",
   "license": "ISC",
