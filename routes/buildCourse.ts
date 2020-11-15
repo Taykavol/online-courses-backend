@@ -1,7 +1,7 @@
 import {Request,Router } from 'express'
 import {v4 as uuidv4} from 'uuid'
 import {PrismaClient} from "@prisma/client" 
-import {isAuth, isInstructor} from '../permissions/auth'
+import {isAuth, isInstructor , isAdmin} from '../permissions/auth'
 import AWS from "aws-sdk";
 // const AWS = require('aws-sdk');
 
@@ -38,7 +38,8 @@ const app = Router()
 export interface IGetUserAuthInfoRequest extends Request {
     user: {
       id,
-      instructorId
+      instructorId,
+      role
     },
     course,
   }
@@ -53,6 +54,17 @@ prisma.$use(async (params, next) => {
     );
     return result;
   });
+// Get all courses sended on verification. 
+app.get('/verified', isAuth,isAdmin, async(req,res)=>{
+ const courses = await prisma.course.findMany({
+     where:{
+         status:{
+             equals:"VERIFYING"
+         }
+     }
+ })
+ res.json(courses)
+})
 //Get all published course for main page
 app.get('/published', async(req,res)=>{
     console.log(req.path)
@@ -71,6 +83,9 @@ app.get('/published', async(req,res)=>{
       console.log('FROM DB')
 
     const courses = await prisma.course.findMany({
+        where:{
+            status:"PUBLISH"
+        },
         include:{
             author:{
                 select:{
@@ -92,7 +107,7 @@ app.get('/published', async(req,res)=>{
     // res.json(courses) 
     // client.set('courses', JSON.stringify(courses))
 })
-
+// Newest
 app.get('/newest', async (req,res)=>{
     const redisCourse = await clientRedis.get(req.path)
       if(redisCourse) {
@@ -101,29 +116,66 @@ app.get('/newest', async (req,res)=>{
         return res.json(course)
       } 
     const courses = await prisma.course.findMany({
-        take:7
+        take:7,
+        include:{
+            author:{
+                select:{
+                    teacherName:true,
+                    title:true,
+                    aboutMe:true,
+                    avatar:true,
+                    registedStudents:true,
+                    publishedCourses:true,
+                }
+            }
+        }
     })
     res.json(courses)
     clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
 
 })
-
+// Top
 app.get('/top', async (req,res)=>{
     const courses = await prisma.course.findMany({
-        take:6
+        take:6,
+        include:{
+            author:{
+                select:{
+                    teacherName:true,
+                    title:true,
+                    aboutMe:true,
+                    avatar:true,
+                    registedStudents:true,
+                    publishedCourses:true,
+                }
+            }
+        }
     })
     res.json(courses)
 })
+// Recommended
 app.get('/recommended', async (req,res)=>{
     const courses = await prisma.course.findMany({
-        take:2
+        take:2,
+        include:{
+            author:{
+                select:{
+                    teacherName:true,
+                    title:true,
+                    aboutMe:true,
+                    avatar:true,
+                    registedStudents:true,
+                    publishedCourses:true,
+                }
+            }
+        }
     })
     res.json(courses)
 })
 //Get list of courses
 app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     //  clientRedis.flushall()
-
+    if(!req.user.instructorId) return res.json('Finnish')
     const courses = await clientRedis.get(`myCourses${req.user.instructorId}`)
     if(courses)  {
         console.log('FROM REDIS')
@@ -151,7 +203,7 @@ app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
         }
     })
     if(!course) return res.json('Course not found')
-    if(course.authorId!=req.user.instructorId) return res.json('You are not owner')
+    if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
     res.json(course)
     clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
 
@@ -202,18 +254,21 @@ app.get('/:id/preview',async(req,res)=>{
     // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
 
 })
-
+// Get reviews
 app.get('/:id/review', async(req,res)=>{
     const reviews = await prisma.review.findMany({
         where:{
             courseId:+req.params.id
-        }
+        },
+        take:5
     })
     res.json(reviews)
 })
 // Create course
 app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-    if(!req.user.instructorId) return res.json('You are not teacher')
+    // if(!req.user.instructorId) return res.json('You are not teacher')
+    // TODO:After prisma will be stable to add this functional, checking for exist course status =='BUILDING'.
+    // const buildingCourse = await prisma.course.findFirst({})
     const curriculum = [{id:uuidv4(),name:"",order:0,lessons:[{order:"0",id:uuidv4(),name:"",description:"",video:{duration:"0"},puzzles:[]}]}]
     const course = await prisma.course.create({
         data:{
@@ -225,6 +280,9 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
             curriculum: JSON.stringify(curriculum),
             reviewStats:{
                 set:[0,0,0,0,0]
+            },
+            level:{
+                set:[1000,2900]
             }
         },        
     })
@@ -234,6 +292,7 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
 app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
     
     let {curriculum,lessons,duration,totalPuzzles} = req.body
+    console.log(curriculum,lessons,duration,totalPuzzles)
     // console.log(curriculum)
     // curriculum=JSON.stringify(curriculum)
     duration= Math.floor(duration)
@@ -261,7 +320,47 @@ app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoReq
     clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
     
 })
-
+// Publish course by Admin
+app.put('/publish/:id', isAuth,isAdmin, async(req,res)=>{
+    const course = await prisma.course.update({
+        where:{
+            id:+req.params.id
+        },
+        data:{
+            status:{
+                set:"PUBLISH"
+            }
+        }
+    })
+    res.json(course)
+   })
+// Sent to verification by user.
+app.put('/verifying/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+    const course  = await prisma.course.findOne({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            authorId:true,
+            status:true
+        }
+    })
+    if(!course) return res.json('Course not found')
+    if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
+    if(course.status!="BUILDING") return res.json('The course has no Build status')
+    await prisma.course.update({
+        where:{
+            id:+req.params.id
+        },
+        data:{
+            status:{
+                set:"VERIFYING"
+            }
+        }
+    })
+    res.json('Course is already verifying.')
+})
+// Update photo.
 app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
     // var storage = multer.memoryStorage()
@@ -304,13 +403,13 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
                   }
                 }
             })
-            res.send("ok");
+            console.log('we are here')
+            res.json({pictureUri:AWSKey});
 
         }           // successful response
      })
 })
-
-
+// Teacher
 app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
     // var storage = multer.memoryStorage()
@@ -368,7 +467,7 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
 // Update course info
 app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
     
-    let {title,subtitle,description,category,level,price} = req.body
+    let {title,subtitle,description,category,level,price,sentences } = req.body
     console.log(title,subtitle,description,category,level,price)
     // let imageUrl
     // if(req.file)
@@ -396,6 +495,9 @@ app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRe
             },
             price:{
                 set:+price
+            },
+            sentences:{
+                set:sentences
             }
         }
     })
@@ -414,7 +516,7 @@ async function isCourseOwner(req,res,next) {
         }
     })
     if(!course) return res.json('Course not found')
-    if(course.authorId!=req.user.instructorId) return res.json('You are not owner')
+    if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
     req.course=course
     next()
 } 

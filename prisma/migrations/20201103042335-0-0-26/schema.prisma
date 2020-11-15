@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -47,7 +47,6 @@ model BoughtCourse {
   course Course @relation(fields: [courseId],references:[id])
   courseId Int
   progressOfLessons Boolean[]
-  progressOfPuzzles Boolean[]
   progress Int @default(0)
   lastSeen DateTime @default(now())
   review Review? @relation(fields: [reviewId], references:[id])
@@ -141,8 +140,8 @@ enum Category {
 enum Status {
 BUILDING
 VERIFYING
-PUBLISHED
-UNPUBLISHED
+PUBLISH
+UNPUBLISH
 }
 enum Level {
   BASIC

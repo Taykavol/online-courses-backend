@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { json, Router } from "express";
 import {PrismaClient} from "@prisma/client"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
@@ -6,6 +6,7 @@ import {isAuth, isAdmin,isInstructor} from '../permissions/auth'
 
 //for extending classes
 import { Request } from "express"
+import { userInfo } from "os";
 export interface IGetUserAuthInfoRequest extends Request {
   user: {
     id,
@@ -13,7 +14,11 @@ export interface IGetUserAuthInfoRequest extends Request {
     instructorId
   } // or any other type
 }
-
+export interface userInfo extends Request {
+  data: {
+    payer_id
+  }
+}
 
 const app = Router();
 
@@ -109,20 +114,23 @@ app.post("/login",async (req,res)=>{
   const user = await prisma.user.findOne({
     where: {
       email
+    },
+    include:{
+      instructorProfile:true
     }
   })
   if(!user) return res.json({error:'Email or password are incorrect'})
   const id = user.id
   const role = user.role
+  
   console.log(role)
   const isMatch = await bcrypt.compare(password,user.password)
   console.log(isMatch)
   if(!isMatch) return res.json('Password incorrect')
-  const token=jwt.sign({id,role},'secret')
+  const token=jwt.sign({id,role,instructorId:user.instructorProfile.id},'secret')
   res.json({token, user:{role,email}})
   
 })
-
 app.post("/signup", async (req, res) => {
   const { email, password } = req.body;
   console.log(email,password)
@@ -152,7 +160,59 @@ app.post("/signup", async (req, res) => {
 
 });
 
+app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
+  const {code} = req.body
+  const paypal = require('paypal-rest-sdk')
+  paypal.configure({
+    'openid_client_id': process.env.SANBOX_PAYPAL_CLIENT,
+    'openid_client_secret': process.env.SANDBOX_PAYPAL_SECRET,
+    'openid_redirect_uri': 'http://127.0.0.1:3000/paypal' });
 
+    
+  paypal.openIdConnect.tokeninfo.create(code, function(error, tokeninfo){
+    console.log(tokeninfo);
+    if(!tokeninfo) return res.send('Something wrong')
+    paypal.openIdConnect.userinfo.get(tokeninfo.access_token, async function(error, userinfo){
+      if(error) return res.json(error)
+      console.log('Cool')
+      console.log()
+      console.log(userinfo);
+      // userInfo.
+      await updateUserPaypalCredentials(req.user.instructorId,userinfo)
+      // await prisma.instructorProfile.update({
+      //   where:{
+      //     id:req.user.instructorId
+      //   },
+      //   data:{
+      //     paypalId:{
+      //       set:userInfo.data.payer_id
+      //   }
+      // }
+      // })
+      res.json(userinfo)
+    });
+  });
+})
+
+async function updateUserPaypalCredentials(profileId,userInfo) {
+  console.log('userInfo',userInfo.payer_id)
+  console.log('',profileId)
+  // const good= JSON.parse(userInfo)
+  // console.log('good',good)
+  return  prisma.instructorProfile.update({
+    where:{
+      id:profileId
+    },
+    data:{
+      paypalId:{
+        set:userInfo.payer_id
+    },
+    paymentMethod:{
+      set:"PAYPAL"
+    }
+  }
+  })
+}
 
 
 export default app;

@@ -26,6 +26,8 @@ prisma.$use(async (params, next) => {
     );
     return result;
   });
+
+//Get bought courses
 app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     // clientRedis.flushall()
     const redisCourse = await clientRedis.get(`${req.user.id}${req.path}`)
@@ -49,15 +51,19 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
                     lessons:true,
                     duration:true,
                     pictureUri:true,
+                    curriculum:true,
                     author:{
                         select:{
                             teacherName:true,
-                            title:true
+                            title:true,
+                            avatar:true
                         }
                     }
                 }
             },
             progress:true,
+            progressOfLessons:true,
+            progressOfPuzzles:true,
             reviewId:true,
             id:true,
         }
@@ -96,6 +102,71 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     // if(!user) return res.json('User not found')
     res.json(boughtCourse)
     clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
+})
+// Get 1 course
+app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
+    // setTimeout(()=>{
+    //     console.log('I am back in 10 seconds')
+    // },10000)
+    const boughtCourse = await prisma.boughtCourse.findOne({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            course:{
+                select:{
+                    title:true,
+                    curriculum:true,
+                    duration:true,
+                    totalPuzzles:true,
+                    author:{
+                        select:{
+                            teacherName:true,
+                            title:true,
+                            avatar:true
+                        }
+                    }
+                    
+                }
+                
+            },
+            userId:true,
+            progressOfLessons:true,
+            progressOfPuzzles:true,
+        }
+    })
+    if(req.user.id == boughtCourse.userId) return res.json(boughtCourse)
+    res.json('You are not owner')
+})
+app.patch('/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
+    const {progressOfLessons,progressOfPuzzles,progress} = req.body
+    console.log(progressOfLessons,progressOfPuzzles)
+    const boughtCourse = await prisma.boughtCourse.findOne({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            userId:true,
+        }
+    })
+    if(req.user.id != boughtCourse.userId) return res.json('You are now owner.')
+    const updatedCourse = await prisma.boughtCourse.update({
+        where:{
+            id:+req.params.id
+        },
+        data:{
+            progressOfLessons:{
+                set:progressOfLessons
+            },
+            progressOfPuzzles:{
+                set:progressOfPuzzles
+            },
+            progress:{
+                set:progress
+            }
+        }
+    })
+    res.send('Ok')
 })
 // Buy course
 app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
@@ -242,7 +313,7 @@ const course = await prisma.boughtCourse.findOne({
         courseId:true,
         course:{
             select:{
-                reviewStats:true
+                reviewStats:true,
             }
         }
     }
@@ -252,6 +323,7 @@ if(course.review) return res.json('You have already voted')
 const {review,reviewMessage,authorName,reviewSubtitle} = req.body
 
 course.course.reviewStats[review-1]++
+const avgRating = course.course.reviewStats.reduce((acc,val,index)=>acc+val*(index+1))/course.course.reviewStats.reduce((acc,val)=>acc+val)
 
 const newReview = await prisma.review.create({
     data:{
@@ -278,7 +350,11 @@ const updatedCourse = await prisma.course.update({
     data:{
         reviewStats:{
             set:course.course.reviewStats
+        },
+        averageRating:{
+            set:avgRating
         }
+        
     }
 })
 

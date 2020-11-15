@@ -31,7 +31,7 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
     }
   })
 
-  if(req.user.instructorId!=course.authorId) return res.json('Something wrong:(')
+  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
 
   const videoArray = course.videos
   const index= videoArray.findIndex(videoId => videoId==req.params.vimeoId)
@@ -85,6 +85,7 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
 })
 
 app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+   
   const course = await prisma.course.findOne({
     where:{
       id:+req.params.courseId
@@ -95,7 +96,7 @@ app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserA
     }
   })
 
-  if(req.user.instructorId!=course.authorId) return res.json('Something wrong:(')
+  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
 
   // const videoArray = course.videos
   // const index= videoArray.findIndex(videoId => videoId==req.params.vimeoId)
@@ -135,7 +136,6 @@ app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserA
       apiCall
 })
 
-
 app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
   const course = await prisma.course.findOne({
     where:{
@@ -147,7 +147,7 @@ app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
     }
   })
 
-  if(req.user.instructorId!=course.authorId) return res.json('Something wrong:(')
+  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
   const fetch = require('node-fetch');
   const {size} = req.body 
   console.log(size)
@@ -194,7 +194,6 @@ app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
   // })
 })
 
-
 app.post('/promo/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
   const course = await prisma.course.findOne({
     where:{
@@ -206,7 +205,7 @@ app.post('/promo/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
     }
   })
 
-  if(req.user.instructorId!=course.authorId) return res.json('Something wrong:(')
+  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
   const fetch = require('node-fetch');
   const {size} = req.body 
   console.log(size)

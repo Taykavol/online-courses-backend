@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -38,7 +38,6 @@ model instructorProfile{
   registedStudents Int @default(0)
   // videos String[]
   paypalId String?
-  paymentMethod Payment @default(NO)
 }
 model BoughtCourse {
   id Int @default(autoincrement()) @id
@@ -46,8 +45,6 @@ model BoughtCourse {
   userId Int
   course Course @relation(fields: [courseId],references:[id])
   courseId Int
-  progressOfLessons Boolean[]
-  progressOfPuzzles Boolean[]
   progress Int @default(0)
   lastSeen DateTime @default(now())
   review Review? @relation(fields: [reviewId], references:[id])
@@ -87,8 +84,7 @@ author instructorProfile? @relation(fields: [authorId],references:[id])
 authorId Int?
 description String? @default("")
 category Category @default(BASICS)
-level Int[] 
-sentences String[]
+level Level @default(BASIC)
 status Status? @default(BUILDING)
 videos String[]
 registedStudents Int @default(0)
@@ -99,7 +95,7 @@ orders Order[]
 pictureUri String?
 promoVideo String?
 totalPuzzles Int @default(0)
-averageRating Float @default(0)
+// averageRating Float @default(0)
 reviewStats Int[]
 // numberReviews Int @default(0)
 curriculum String?
@@ -121,12 +117,59 @@ model Review {
   authorName String?
 }
 
+// model Curriculum {
+// id Int @default(autoincrement()) @id
+// course Course? @relation(fields: [courseId],references:[id])
+// courseId Int?
+// chapters Chapter[] 
+// }
 
-enum Payment {
-  NO
-  PAYPAL
-  BINANCE
-}
+// model Chapter {
+// id Int @default(autoincrement()) @id
+// curriculum Curriculum @relation(fields: [curriculumID],references:[id])
+// curriculumID Int
+// order Int
+// name String?
+// lessons Lesson[]
+// }
+
+// model Comment {
+// id Int @default(autoincrement()) @id
+// user User @relation(fields: [userID],references:[id])
+// userID Int
+// course Course @relation(fields: [courseID],references:[id])
+// courseID Int
+// title String
+// text String
+// }
+
+// model Lesson {
+// id Int @default(autoincrement()) @id
+// order Int
+// name String?
+// chapter Chapter @relation(fields: [chapterID],references:[id])
+// chapterID Int
+// video Video?
+// puzzles Puzzle[]
+// }
+
+// model Video {
+// id Int @default(autoincrement()) @id
+// vimeoID Int
+// duration Float
+// lesson Lesson @relation(fields: [lessonID],references:[id])
+// lessonID Int
+// }
+
+// model Puzzle {
+//   id Int @default(autoincrement()) @id
+//   lesson Lesson @relation(fields: [lessonID],references:[id])
+//   lessonID Int
+//   description String?
+//   fen String
+//   moves String[]
+//   helps String[]
+// }
 enum InvoiceStatus {
   PAYOUT
   PENDING
@@ -141,8 +184,8 @@ enum Category {
 enum Status {
 BUILDING
 VERIFYING
-PUBLISHED
-UNPUBLISHED
+PUBLISH
+UNPUBLISH
 }
 enum Level {
   BASIC

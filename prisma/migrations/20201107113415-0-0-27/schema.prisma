@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -141,8 +141,8 @@ enum Category {
 enum Status {
 BUILDING
 VERIFYING
-PUBLISHED
-UNPUBLISHED
+PUBLISH
+UNPUBLISH
 }
 enum Level {
   BASIC
