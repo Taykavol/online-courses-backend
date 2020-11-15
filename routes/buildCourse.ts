@@ -317,7 +317,7 @@ app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoReq
         }
     }) 
     res.json('Ok')
-    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
+    // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
     
 })
 // Publish course by Admin
@@ -502,7 +502,7 @@ app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRe
         }
     })
     res.json('Ok')
-    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
+    // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
 })
 
 async function isCourseOwner(req,res,next) {
