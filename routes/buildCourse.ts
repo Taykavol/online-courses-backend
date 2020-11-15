@@ -23,11 +23,11 @@ const upload2 = multer({ storage: storage }).single('image')
 const upload = multer({ storage: fileStorage }).single('image')
 
 
-const { promisify } = require("util");
-const redis = require('redis')
-const redisUrl = 'redis://localhost:6379'
-const clientRedis = redis.createClient(redisUrl)
-clientRedis.get = promisify(clientRedis.get)
+// const { promisify } = require("util");
+// const redis = require('redis')
+// const redisUrl = 'redis://localhost:6379'
+// const clientRedis = redis.createClient(redisUrl)
+// clientRedis.get = promisify(clientRedis.get)
 // import redis from 'redis'
 // const { promisify } = require("util");
 // const redisUrl = 'redis://localhost:6379'
@@ -74,13 +74,13 @@ app.get('/published', async(req,res)=>{
     // prisma.$use(async (params, next)=>{
     //  clientRedis.flushall()
 
-      const redisCourse = await clientRedis.get(req.path)
-      if(redisCourse) {
-        console.log('FROM REDIS')
-        const course:JSON = JSON.parse(redisCourse)
-        return res.json(course)
-      } 
-      console.log('FROM DB')
+    //   const redisCourse = await clientRedis.get(req.path)
+    //   if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     const course:JSON = JSON.parse(redisCourse)
+    //     return res.json(course)
+    //   } 
+    //   console.log('FROM DB')
 
     const courses = await prisma.course.findMany({
         where:{
@@ -102,19 +102,19 @@ app.get('/published', async(req,res)=>{
     // clientRedis.flushall()
     
     res.json(courses) 
-    clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
+    // clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
     
     // res.json(courses) 
     // client.set('courses', JSON.stringify(courses))
 })
 // Newest
 app.get('/newest', async (req,res)=>{
-    const redisCourse = await clientRedis.get(req.path)
-      if(redisCourse) {
-        console.log('FROM REDIS')
-        const course:JSON = JSON.parse(redisCourse)
-        return res.json(course)
-      } 
+    // const redisCourse = await clientRedis.get(req.path)
+    //   if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     const course:JSON = JSON.parse(redisCourse)
+    //     return res.json(course)
+    //   } 
     const courses = await prisma.course.findMany({
         take:7,
         include:{
@@ -131,7 +131,7 @@ app.get('/newest', async (req,res)=>{
         }
     })
     res.json(courses)
-    clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
+    // clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
 
 })
 // Top
@@ -175,12 +175,12 @@ app.get('/recommended', async (req,res)=>{
 //Get list of courses
 app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     //  clientRedis.flushall()
-    if(!req.user.instructorId) return res.json('Finnish')
-    const courses = await clientRedis.get(`myCourses${req.user.instructorId}`)
-    if(courses)  {
-        console.log('FROM REDIS')
-        return res.json(JSON.parse(courses))
-    }
+    // if(!req.user.instructorId) return res.json('Finnish')
+    // const courses = await clientRedis.get(`myCourses${req.user.instructorId}`)
+    // if(courses)  {
+    //     console.log('FROM REDIS')
+    //     return res.json(JSON.parse(courses))
+    // }
     const myCourses = await prisma.course.findMany({
        where:{
             authorId:req.user.instructorId
@@ -188,15 +188,15 @@ app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     }) 
 
     res.json(myCourses)
-    clientRedis.set(`myCourses${req.user.instructorId}`,JSON.stringify(myCourses),'EX', 10)
+    // clientRedis.set(`myCourses${req.user.instructorId}`,JSON.stringify(myCourses),'EX', 10)
 })
 //Get specific course
 app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-    const redisCourse = await clientRedis.get(`${req.params.id}myCourse${req.user.instructorId}`)
-    if(redisCourse) {
-        console.log('FROM REDIS')
-        return res.json(JSON.parse(redisCourse)) 
-    }
+    // const redisCourse = await clientRedis.get(`${req.params.id}myCourse${req.user.instructorId}`)
+    // if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     return res.json(JSON.parse(redisCourse)) 
+    // }
     const course  = await prisma.course.findOne({
         where:{
             id:+req.params.id
@@ -204,19 +204,19 @@ app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     })
     if(!course) return res.json('Course not found')
     if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
-    res.json(course)
-    clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
+    // res.json(course)
+    // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
 
 })
 // Get preview (public, for all)
 app.get('/:id/preview',async(req,res)=>{
-    console.log(req.path)
-    const redisCourse = await clientRedis.get(req.path)
-      if(redisCourse) {
-        console.log('FROM REDIS')
-        const course:JSON = JSON.parse(redisCourse)
-        return res.json(course)
-      } 
+    // console.log(req.path)
+    // const redisCourse = await clientRedis.get(req.path)
+    //   if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     const course:JSON = JSON.parse(redisCourse)
+    //     return res.json(course)
+    //   } 
     // const redisCourse = await clientRedis.get(`coursePreview${req.params.id}`)
     // if(redisCourse) {
     //     console.log('FROM REDIS')
@@ -249,7 +249,7 @@ app.get('/:id/preview',async(req,res)=>{
 
     })
     res.json(course)
-    clientRedis.set(req.path, JSON.stringify(course),'EX',10)
+    // clientRedis.set(req.path, JSON.stringify(course),'EX',10)
 
     // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
 

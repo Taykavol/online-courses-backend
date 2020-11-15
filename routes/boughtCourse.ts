@@ -1,11 +1,11 @@
 import {Request,Router } from 'express'
 import {PrismaClient} from "@prisma/client"
 import {isAuth, isAdmin} from '../permissions/auth'
-const { promisify } = require("util");
-const redis = require('redis')
-const redisUrl = 'redis://localhost:6379'
-const clientRedis = redis.createClient(redisUrl)
-clientRedis.get = promisify(clientRedis.get)
+// const { promisify } = require("util");
+// const redis = require('redis')
+// const redisUrl = 'redis://localhost:6379'
+// const clientRedis = redis.createClient(redisUrl)
+// clientRedis.get = promisify(clientRedis.get)
 
 const app = Router()
 
@@ -30,13 +30,13 @@ prisma.$use(async (params, next) => {
 //Get bought courses
 app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     // clientRedis.flushall()
-    const redisCourse = await clientRedis.get(`${req.user.id}${req.path}`)
-    console.log(redisCourse)
-    if(redisCourse) {
-        console.log('FROM REDIS')
-        const course:JSON = JSON.parse(redisCourse)
-        return res.json(course)
-      } 
+    // const redisCourse = await clientRedis.get(`${req.user.id}${req.path}`)
+    // console.log(redisCourse)
+    // if(redisCourse) {
+    //     console.log('FROM REDIS')
+    //     const course:JSON = JSON.parse(redisCourse)
+    //     return res.json(course)
+    //   } 
     const boughtCourse = await prisma.boughtCourse.findMany({
         where:{
             userId:req.user.id
@@ -101,7 +101,7 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     // })
     // if(!user) return res.json('User not found')
     res.json(boughtCourse)
-    clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
+    // clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
 })
 // Get 1 course
 app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{

@@ -1,12 +1,12 @@
 import { Router } from "express";
 import {PrismaClient} from "@prisma/client"
 import {isAuth, isInstructor} from '../permissions/auth'
-const { promisify } = require("util");
-const redis = require('redis')
-const redisUrl = 'redis://localhost:6379'
-const clientRedis = redis.createClient(redisUrl)
-clientRedis.get = promisify(clientRedis.get)
-clientRedis.hmget = promisify(clientRedis.hmget)
+// const { promisify } = require("util");
+// const redis = require('redis')
+// const redisUrl = 'redis://localhost:6379'
+// const clientRedis = redis.createClient(redisUrl)
+// clientRedis.get = promisify(clientRedis.get)
+// clientRedis.hmget = promisify(clientRedis.hmget)
 
 
 //for extending classes
