@@ -141,8 +141,8 @@ enum Category {
 enum Status {
 BUILDING
 VERIFYING
-PUBLISHED
-UNPUBLISHED
+PUBLISH
+UNPUBLISH
 }
 enum Level {
   BASIC
