@@ -37,7 +37,10 @@ app.use('/boughtcourse',boughtCourse)
 app.use('/order',order)
 app.use('/payment',payment)
 
-const port = process.env.PORT || 4000
+let port;
+if(process.env.NODE_ENV=="production")
+    port = process.env.PORT 
+else port = 4000
 app.listen(port, ()=>{
-    console.log('Server is listenig:',port)
+    console.log('Server is listening:',port)
 })
