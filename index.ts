@@ -1,4 +1,6 @@
-require('dotenv').config()
+
+if (process.env.NODE_ENV !== 'production') require('dotenv').config()
+// require('dotenv').config()
 import express from 'express'
 // import {PrismaClient} from "@prisma/client"
 import cors from 'cors'
@@ -37,10 +39,7 @@ app.use('/boughtcourse',boughtCourse)
 app.use('/order',order)
 app.use('/payment',payment)
 
-let port;
-if(process.env.NODE_ENV=="production")
-    port = process.env.PORT 
-else port = 4000
+let port = process.env.PORT || 4000
 app.listen(port, ()=>{
-    console.log('Server is listening:',port)
+    console.log('Server is listening on port: ',port)
 })
