@@ -25,7 +25,7 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{
     console.log(req.app.get('yoy'))
-    res.send(`<h1>Hello ${JSON.stringify(req.query.email)+req.app.get('yoy') } world</h1>`)
+    res.json('uous')
     
 })
 
@@ -37,7 +37,7 @@ app.use('/boughtcourse',boughtCourse)
 app.use('/order',order)
 app.use('/payment',payment)
 
-const port = 4000
+const port = process.env.PORT || 4000
 app.listen(port, ()=>{
     console.log('Server is listenig:',port)
 })

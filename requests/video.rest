@@ -12,4 +12,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 PATCH http://localhost:4000/buildcourse/photo
 
 ### 
+GET  http://my-prisma-app-vologda.herokuapp.com
+
+### 
 PUT http://chess-courses.hb.bizmrg.com/course/image5?AWSAccessKeyId=8w1tDW9mDGyYNg6YAT4gnA&Content-Type=jpeg&Expires=1601830334&Signature=aRQFiFke80DjRyCOfhVai7LyORw%3D
