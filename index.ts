@@ -39,7 +39,7 @@ app.use('/boughtcourse',boughtCourse)
 app.use('/order',order)
 app.use('/payment',payment)
 
-let port = process.env.PORT || 4000
-app.listen(port, ()=>{
-    console.log('Server is listening on port: ',port)
+let PORT = process.env.PORT || 4000
+app.listen(PORT, ()=>{
+    console.log('Server is listening on port: ', PORT)
 })
