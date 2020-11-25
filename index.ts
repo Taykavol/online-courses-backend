@@ -1,5 +1,6 @@
 
-if (process.env.NODE_ENV !== 'production') require('dotenv').config()
+// if (process.env.NODE_ENV !== 'production')
+require('dotenv').config()
 // require('dotenv').config()
 import express from 'express'
 // import compression from "compression"
@@ -30,7 +31,7 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{
     console.log(req.app.get('yoy'))
-    res.json(process.env.NODE_ENV)
+    res.json({env:process.env.NODE_ENV,binance:process.env.BINANCE_CLIENT})
     
 })
 
