@@ -116,7 +116,6 @@ app.get('/newest', async (req,res)=>{
     //     return res.json(course)
     //   } 
     const courses = await prisma.course.findMany({
-        take:7,
         include:{
             author:{
                 select:{
@@ -137,7 +136,6 @@ app.get('/newest', async (req,res)=>{
 // Top
 app.get('/top', async (req,res)=>{
     const courses = await prisma.course.findMany({
-        take:6,
         include:{
             author:{
                 select:{
@@ -156,7 +154,6 @@ app.get('/top', async (req,res)=>{
 // Recommended
 app.get('/recommended', async (req,res)=>{
     const courses = await prisma.course.findMany({
-        take:2,
         include:{
             author:{
                 select:{
@@ -204,7 +201,7 @@ app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     })
     if(!course) return res.json('Course not found')
     if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
-    // res.json(course)
+    res.json(course)
     // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
 
 })
@@ -467,8 +464,8 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
 // Update course info
 app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
     
-    let {title,subtitle,description,category,level,price,sentences } = req.body
-    console.log(title,subtitle,description,category,level,price)
+    let {title,subtitle,description,category,level,price,sentences,forWho,whatStudentsGet } = req.body
+    console.log(forWho,whatStudentsGet)
     // let imageUrl
     // if(req.file)
     // imageUrl = req.file.path
@@ -486,6 +483,12 @@ app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRe
             },
             description:{
                 set:description
+            },
+            forWho:{
+                set:forWho
+            },
+            whatStudentsGet:{
+                set:whatStudentsGet
             },
             category:{
                 set:category

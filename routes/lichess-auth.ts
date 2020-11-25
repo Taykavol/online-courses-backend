@@ -15,7 +15,7 @@ const axios = require('axios');
 const port = 3000;
 const clientId = 'IKGglix7XImcYLPc';
 const clientSecret = '43nbT0LBFw3UGjUy2eNrPOzWv07Vg0zF';
-const redirectUri = `http://localhost:${port}/test`;
+const redirectUri = `http://localhost:${port}/auth/?provider=lichess`;
 
 /* --- Lichess config --- */
 const tokenHost = 'https://oauth.lichess.org';

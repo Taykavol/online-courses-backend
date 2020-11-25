@@ -133,6 +133,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
             userId:true,
             progressOfLessons:true,
             progressOfPuzzles:true,
+            reviewId:true
         }
     })
     if(req.user.id == boughtCourse.userId) return res.json(boughtCourse)
