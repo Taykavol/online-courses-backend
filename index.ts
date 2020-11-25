@@ -30,7 +30,7 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{
     console.log(req.app.get('yoy'))
-    res.json('uous')
+    res.json(process.env.NODE_ENV)
     
 })
 
