@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": " node dist/index.js ",
+    "start": " BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": "12.14.1"
+    "node": "14.15.1"
   },
   "keywords": [],
   "author": "",
