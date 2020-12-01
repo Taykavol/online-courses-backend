@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -14,12 +14,11 @@ generator client {
 model User {
   id      Int      @default(autoincrement()) @id
   role Role @default(USER)
-  email   String? 
+  email   String? @unique
   password String? 
   lichessId String? @unique
   googleId String? @unique
   facebookId String? @unique
-  VKId Int? @unique
   boughtCourses BoughtCourse[] 
   isBanned Boolean @default(false)
   instructorProfile instructorProfile? 

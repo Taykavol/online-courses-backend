@@ -13,7 +13,8 @@ const axios = require('axios');
 
 /* --- Fill in your app config here --- */
 const port = 3000;
-const clientId = 'IKGglix7XImcYLPc';
+const clientId = process.env.NODE_ENV == 'production'? 'HiJRdVFcIWpn8yj2':'IKGglix7XImcYLPc'
+process.env.NODE_ENV == 'production'? 'FdEfs81wXkaDfk5osx6ZYN52GTNpEp11':'43nbT0LBFw3UGjUy2eNrPOzWv07Vg0zF'
 const clientSecret = '43nbT0LBFw3UGjUy2eNrPOzWv07Vg0zF';
 const redirectUri = `http://localhost:${port}/auth/?provider=lichess`;
 

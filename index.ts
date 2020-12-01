@@ -1,6 +1,6 @@
 
-// if (process.env.NODE_ENV !== 'production')
-// require('dotenv').config()
+if (process.env.NODE_ENV !== 'production')
+require('dotenv').config()
 // require('dotenv').config()
 import express from 'express'
 // import compression from "compression"
@@ -14,6 +14,7 @@ import payment from './routes/payment'
 import routeVideo from './routes/video'
 import authRoutes from './routes/auth'
 import routerLichess from "./routes/lichess-auth"
+import invoices from './routes/invoices'
 
 const app = express()
 
@@ -43,6 +44,7 @@ app.use('/boughtcourse',boughtCourse)
 app.use('/order',order)
 app.use('/payment',payment)
 app.use('/auth',authRoutes)
+app.use('/invoices',invoices)
 
 let PORT = process.env.PORT || 4000
 app.listen(PORT, ()=>{

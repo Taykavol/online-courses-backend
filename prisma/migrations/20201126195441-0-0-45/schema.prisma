@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -19,7 +19,7 @@ model User {
   lichessId String? @unique
   googleId String? @unique
   facebookId String? @unique
-  VKId Int? @unique
+  VKId String? @unique
   boughtCourses BoughtCourse[] 
   isBanned Boolean @default(false)
   instructorProfile instructorProfile? 
