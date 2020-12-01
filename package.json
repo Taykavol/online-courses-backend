@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": " BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
+    "start": "FRONTEND_URL=https://many-woman-must-be.surge.sh BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deployapp":"git add . && git commit -m 'Fixed' & git push master origin "
   },
   "engines": {
     "node": "14.15.1"

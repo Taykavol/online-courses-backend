@@ -16,7 +16,7 @@ const port = 3000;
 const clientId = process.env.NODE_ENV == 'production'? 'HiJRdVFcIWpn8yj2':'IKGglix7XImcYLPc'
 
 const clientSecret = process.env.NODE_ENV == 'production'? 'FdEfs81wXkaDfk5osx6ZYN52GTNpEp11':'43nbT0LBFw3UGjUy2eNrPOzWv07Vg0zF'
-const redirectUri = `http://localhost:${port}/auth/?provider=lichess`;
+const redirectUri = `${process.env.FRONTEND_URL}/auth/?provider=lichess`;
 
 /* --- Lichess config --- */
 const tokenHost = 'https://oauth.lichess.org';
