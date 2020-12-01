@@ -8,7 +8,7 @@
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deployapp":"git add . && git commit -m 'Fixed' & git push master origin "
+    "deployapp":"git add . && git commit -m 'Fixed' & git push heroku master "
   },
   "engines": {
     "node": "14.15.1"
