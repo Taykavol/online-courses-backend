@@ -107,6 +107,7 @@ const url = `https://oauth.vk.com/access_token?client_id=${process.env.VK_CLIENT
 let data = await fetch(url)
 // const access_token = await data.json()
 const {access_token, user_id ,email} = await data.json()
+console.log('accessToken',access_token,'User ID',user_id, 'Email', email)
 let user = await prisma.user.findOne({
     where:{
         VKId:user_id
@@ -116,6 +117,7 @@ let user = await prisma.user.findOne({
         role:true
     }
 })
+console.log(user)
 if(!user)
  user = await prisma.user.create({
     data:{
