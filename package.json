@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "FRONTEND_URL=https://many-woman-must-be.surge.sh BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
+    "start": "VK_CLIENT_SECRET=b2IxFuAeN0hKXFKIG4BC VK_CLIENT_ID=7678450  FRONTEND_URL=https://many-woman-must-be.surge.sh BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
