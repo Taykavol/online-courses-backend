@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "VK_CLIENT_SECRET=b2IxFuAeN0hKXFKIG4BC VK_CLIENT_ID=7678450  FRONTEND_URL=https://many-woman-must-be.surge.sh BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
+    "start": "GOOGLE_CLIENT_ID=231498108232-bqrk6v0pmvnm8o8igcn6en22f42g41ls.apps.googleusercontent.com GOOGLE_CLIENT_SECRET=QrwdEA1hK-BYzVXEYCDM-AiY FACEBOOK_CLIENT_ID=314836566324405 FACEBOOK_CLIENT_SECRET=de3c97ceb2199cd7ec2d8d051468c33d VK_CLIENT_SECRET=b2IxFuAeN0hKXFKIG4BC VK_CLIENT_ID=7678450  FRONTEND_URL=https://many-woman-must-be.surge.sh BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
