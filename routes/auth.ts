@@ -103,7 +103,7 @@ app.post('/vk', async (req,res)=>{
 console.log('VK')
 const {code} = req.body
 console.log(code)
-const url = `https://oauth.vk.com/access_token?client_id=${process.env.VK_CLIENT_ID}&client_secret=${process.env.VK_CLIENT_SECRET}&redirect_uri=${process.env.FRONTEND_URL}/auth?provider=vk&code=${code}`
+const url = `https://oauth.vk.com/access_token?client_id=${process.env.VK_CLIENT_ID}&client_secret=${process.env.VK_CLIENT_SECRET}&redirect_uri=${process.env.FRONTEND_URL}/auth/?provider=vk&code=${code}`
 let data = await fetch(url)
 // const access_token = await data.json()
 const {access_token, user_id ,email} = await data.json()

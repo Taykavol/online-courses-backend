@@ -20,6 +20,7 @@ var client = new Vimeo("32d615dc4ca483e433a4bf76192475102dcee8c0", "lNFDTgMihkuv
 // app.post('/create',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
 
 // })
+// Delete video from course
 app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
   const course = await prisma.course.findOne({
     where:{

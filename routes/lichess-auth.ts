@@ -76,7 +76,7 @@ app.get('/callback', async (req, res) => {
     })
     if(!user) {
       let newUser
-      if(title=="GM"||title=="IM"||title=="WGM"||title=="WIM") {
+      if(title=="GM"||title=="IM"||title=="WGM") {
          newUser = await prisma.user.create({
           data:{
             lichessId:id,
