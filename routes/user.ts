@@ -166,7 +166,7 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   paypal.configure({
     'openid_client_id': process.env.SANBOX_PAYPAL_CLIENT,
     'openid_client_secret': process.env.SANDBOX_PAYPAL_SECRET,
-    'openid_redirect_uri': 'http://127.0.0.1:3000/paypal' });
+    'openid_redirect_uri': 'https://many-woman-must-be.surge.sh/paypal' });
 
     
   paypal.openIdConnect.tokeninfo.create(code, function(error, tokeninfo){

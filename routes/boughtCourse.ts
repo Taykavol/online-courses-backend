@@ -52,6 +52,7 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
                     duration:true,
                     pictureUri:true,
                     curriculum:true,
+                    totalPuzzles:true,
                     author:{
                         select:{
                             teacherName:true,
