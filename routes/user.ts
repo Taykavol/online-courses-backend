@@ -195,7 +195,7 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
 })
 
 async function updateUserPaypalCredentials(profileId,userInfo) {
-  console.log('userInfo',userInfo.payer_id)
+  console.log('userInfo',userInfo)
   console.log('',profileId)
   // const good= JSON.parse(userInfo)
   // console.log('good',good)
@@ -205,7 +205,7 @@ async function updateUserPaypalCredentials(profileId,userInfo) {
     },
     data:{
       paypalId:{
-        set:userInfo.payer_id
+        set:userInfo.email
     },
     paymentMethod:{
       set:"PAYPAL"
