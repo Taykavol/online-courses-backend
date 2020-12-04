@@ -164,8 +164,8 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   const {code} = req.body
   const paypal = require('paypal-rest-sdk')
   paypal.configure({
-    'openid_client_id': process.env.SANBOX_PAYPAL_CLIENT,
-    'openid_client_secret': process.env.SANDBOX_PAYPAL_SECRET,
+    'openid_client_id': process.env.NODE_ENV == 'production' ? process.env.LIVE_PAYPAL_CLIENT : process.env.SANDBOX_PAYPAL_CLIENT,
+    'openid_client_secret': process.env.NODE_ENV == 'production' ?  process.env.LIVE_PAYPAL_SECRET: process.env.SANDBOX_PAYPAL_SECRET ,
     'openid_redirect_uri': 'https://many-woman-must-be.surge.sh/paypal/' });
 
     
