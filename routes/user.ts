@@ -166,9 +166,7 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   paypal.configure({
     'openid_client_id': process.env.NODE_ENV == 'production' ? process.env.LIVE_PAYPAL_CLIENT : process.env.SANDBOX_PAYPAL_CLIENT,
     'openid_client_secret': process.env.NODE_ENV == 'production' ?  process.env.LIVE_PAYPAL_SECRET: process.env.SANDBOX_PAYPAL_SECRET ,
-    'openid_redirect_uri': 'https://many-woman-must-be.surge.sh/paypal/' });
-
-    
+    'openid_redirect_uri': `${process.env.BACKEND_URL}/paypal/` });
   paypal.openIdConnect.tokeninfo.create(code, function(error, tokeninfo){
     console.log(tokeninfo);
     if(!tokeninfo) return res.send('Something wrong')
