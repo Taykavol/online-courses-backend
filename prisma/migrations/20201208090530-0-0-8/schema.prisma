@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
@@ -110,7 +110,6 @@ reviewStats Int[]
 // numberReviews Int @default(0)
 curriculum String?
 reviews Review[]
-searchRating Int @default(0)
 // totalPurchase Int @default(0)
 // totalRevenue Float @default(0)
 // forSearchEngines Float @default(0)

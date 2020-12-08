@@ -140,9 +140,9 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     if(req.user.id == boughtCourse.userId) return res.json(boughtCourse)
     res.json('You are not owner')
 })
+// User progress update
 app.patch('/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     const {progressOfLessons,progressOfPuzzles,progress} = req.body
-    console.log(progressOfLessons,progressOfPuzzles)
     const boughtCourse = await prisma.boughtCourse.findOne({
         where:{
             id:+req.params.id
@@ -194,7 +194,7 @@ app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
     if(!user) return res.json('User not found')
     if(user.instructorProfile) {
         if(user.instructorProfile.myCourses.find(course=>course.id==+req.params.id)) {
-            return res.status(502).end()
+            return res.send('You can not buy your course.')
         }
     }
     // if(user.boughtCourses.find)
@@ -283,6 +283,9 @@ app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
             },
             data:{
                 registedStudents:{
+                    increment:1
+                },
+                searchRating:{
                     increment:1
                 }
             }
