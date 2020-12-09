@@ -71,7 +71,7 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     })
 
     // await prisma.boughtCourse.
-    // const user = await prisma.user.findOne({
+    // const user = await prisma.user.findUnique({
     //     where:{
     //         id:req.user.id
     //     },
@@ -109,7 +109,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     // setTimeout(()=>{
     //     console.log('I am back in 10 seconds')
     // },10000)
-    const boughtCourse = await prisma.boughtCourse.findOne({
+    const boughtCourse = await prisma.boughtCourse.findUnique({
         where:{
             id:+req.params.id
         },
@@ -143,7 +143,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
 // User progress update
 app.patch('/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     const {progressOfLessons,progressOfPuzzles,progress} = req.body
-    const boughtCourse = await prisma.boughtCourse.findOne({
+    const boughtCourse = await prisma.boughtCourse.findUnique({
         where:{
             id:+req.params.id
         },
@@ -172,7 +172,7 @@ app.patch('/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
 })
 // Buy course
 app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
-    const user = await prisma.user.findOne({
+    const user = await prisma.user.findUnique({
         where:{
             id:req.user.id
         },
@@ -308,7 +308,7 @@ app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
 })
 // Review course
 app.post('/:id/review',isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
-const course = await prisma.boughtCourse.findOne({
+const course = await prisma.boughtCourse.findUnique({
     where:{
         id:+req.params.id
     },

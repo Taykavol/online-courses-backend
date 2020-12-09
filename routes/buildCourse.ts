@@ -81,7 +81,7 @@ app.get('/published', async(req,res)=>{
     //     return res.json(course)
     //   } 
     //   console.log('FROM DB')
-
+    
     const courses = await prisma.course.findMany({
         where:{
             status:"PUBLISH"
@@ -194,7 +194,7 @@ app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     //     console.log('FROM REDIS')
     //     return res.json(JSON.parse(redisCourse)) 
     // }
-    const course  = await prisma.course.findOne({
+    const course  = await prisma.course.findUnique({
         where:{
             id:+req.params.id
         }
@@ -219,7 +219,7 @@ app.get('/:id/preview',async(req,res)=>{
     //     console.log('FROM REDIS')
     //     return res.json(JSON.parse(redisCourse)) 
     // }
-    const course = await prisma.course.findOne({
+    const course = await prisma.course.findUnique({
         where:{
             id:+req.params.id
         },
@@ -275,47 +275,28 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
                 }
             },
             curriculum: JSON.stringify(curriculum),
-            reviewStats:{
-                set:[0,0,0,0,0]
-            },
+            reviewStats:[0,0,0,0,0],
             level:{
                 set:[1000,2900]
-            }
+            },
+            description:[{title:'',description:''}]
         },        
     })
     res.json(course)
 })
 // Update curriculum
 app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
-    
-    let {curriculum,lessons,duration,totalPuzzles} = req.body
-    console.log(curriculum,lessons,duration,totalPuzzles)
-    // console.log(curriculum)
-    // curriculum=JSON.stringify(curriculum)
-    duration= Math.floor(duration)
+    const data = req.body
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
         },
         data:{
-            curriculum:{
-                set:curriculum
-            },
-            // curriculum,
-            lessons:{
-                set:lessons
-            },
-            duration:{
-                set:duration
-            },
-            totalPuzzles:{
-                set:totalPuzzles
-            }
+            ...data
         }
     }) 
     res.json('Ok')
     // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
-    
 })
 // Publish course by Admin
 app.put('/publish/:id', isAuth,isAdmin, async(req,res)=>{
@@ -324,16 +305,14 @@ app.put('/publish/:id', isAuth,isAdmin, async(req,res)=>{
             id:+req.params.id
         },
         data:{
-            status:{
-                set:"PUBLISH"
-            }
+            status:"PUBLISH"
         }
     })
     res.json(course)
    })
 // Sent to verification by user.
 app.put('/verifying/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-    const course  = await prisma.course.findOne({
+    const course  = await prisma.course.findUnique({
         where:{
             id:+req.params.id
         },
@@ -343,16 +322,14 @@ app.put('/verifying/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoReques
         }
     })
     if(!course) return res.json('Course not found')
-    if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
+    if(!(course.authorId==req.user.instructorId || req.user.role=="ADMIN")) return res.json('You are not owner')
     if(course.status!="BUILDING") return res.json('The course has no Build status')
     await prisma.course.update({
         where:{
             id:+req.params.id
         },
         data:{
-            status:{
-                set:"VERIFYING"
-            }
+            status:"VERIFYING"
         }
     })
     res.json('Course is already verifying.')
@@ -364,7 +341,6 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
     // const {size,file} = req.body
     console.log('Sizer',req.file)
     // const AWS = require("aws-sdk");
-
     AWS.config.loadFromPath('./utils/aws/config.json')
     const s3 = new AWS.S3({})
 
@@ -416,7 +392,7 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
 
     AWS.config.loadFromPath('./utils/aws/config.json')
     const s3 = new AWS.S3({})
-    const teacher = await prisma.instructorProfile.findOne({
+    const teacher = await prisma.instructorProfile.findUnique({
         where:{
             id:req.user.instructorId
         },
@@ -463,53 +439,19 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
 })
 // Update course info
 app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
-    
-    let {title,subtitle,description,category,level,price,sentences,forWho,whatStudentsGet } = req.body
-    console.log(forWho,whatStudentsGet)
-    // let imageUrl
-    // if(req.file)
-    // imageUrl = req.file.path
-    // console.log(imageUrl)
+    const data = req.body
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
         },
-        data:{
-            title:{
-                set:title
-            },
-            subtitle:{
-                set:subtitle
-            },
-            description:{
-                set:description
-            },
-            forWho:{
-                set:forWho
-            },
-            whatStudentsGet:{
-                set:whatStudentsGet
-            },
-            category:{
-                set:category
-            },
-            level:{
-                set:level
-            },
-            price:{
-                set:+price
-            },
-            sentences:{
-                set:sentences
-            }
-        }
+        data:{ ...data}
     })
     res.json('Ok')
     // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
 })
 
 async function isCourseOwner(req,res,next) {
-    const course  = await prisma.course.findOne({
+    const course  = await prisma.course.findUnique({
         where:{
             id:+req.params.id
         },

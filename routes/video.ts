@@ -22,7 +22,7 @@ var client = new Vimeo("32d615dc4ca483e433a4bf76192475102dcee8c0", "lNFDTgMihkuv
 // })
 // Delete video from course
 app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-  const course = await prisma.course.findOne({
+  const course = await prisma.course.findUnique({
     where:{
       id:+req.params.courseId
     },
@@ -87,7 +87,7 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
 
 app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
    
-  const course = await prisma.course.findOne({
+  const course = await prisma.course.findUnique({
     where:{
       id:+req.params.courseId
     },
@@ -138,7 +138,7 @@ app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserA
 })
 
 app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-  const course = await prisma.course.findOne({
+  const course = await prisma.course.findUnique({
     where:{
       id:+req.params.courseId
     },
@@ -196,7 +196,7 @@ app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
 })
 
 app.post('/promo/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-  const course = await prisma.course.findOne({
+  const course = await prisma.course.findUnique({
     where:{
       id:+req.params.courseId
     },

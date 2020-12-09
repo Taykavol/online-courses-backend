@@ -11,9 +11,9 @@ const prisma = new PrismaClient()
 const app = Router();
 
 app.post('/google',async(req,res)=>{
-    const {code} = req.body
-
-    const url = `https://accounts.google.com/o/oauth2/token?grant_type=authorization_code&code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_SECRET}&redirect_uri=${process.env.FRONTEND_URL}/auth/?provider=google`
+    const {code, authType} = req.body
+    console.log(authType)
+    const url = `https://accounts.google.com/o/oauth2/token?grant_type=authorization_code&code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_SECRET}&redirect_uri=${process.env.FRONTEND_URL}/auth/?provider=google-${authType}`
     const data = await fetch(url, {
         method:"POST"
     })
@@ -25,7 +25,7 @@ app.post('/google',async(req,res)=>{
         }
     })
     const {email} = await emailData.json()
-    let user = await prisma.user.findOne({
+    let user = await prisma.user.findUnique({
         where:{
             googleId:email
         },
@@ -34,42 +34,52 @@ app.post('/google',async(req,res)=>{
             role:true
         }
     })
-    if(!user)
-     user = await prisma.user.create({
-        data:{
-            googleId:email,
-            email:email,
-        },
-        select:{
-            id:true,
-            role:true
-        }
-    }) 
-
-
-    const tokenApp=jwt.sign({
+    if(!user && authType=='register') {
+        user = await prisma.user.create({
+           data:{
+               googleId:email,
+               email:email,
+           },
+           select:{
+               id:true,
+               role:true
+           }
+       }) 
+       const tokenApp=jwt.sign({
         id:user.id,
         role:user.role,
       },'secret')
+     return res.json({email,role:"USER", token:tokenApp})
+    }
+    else if(!user && authType=='login') {
+       return res.send('This user is not found. Try to register a new account.')
+    } else if(user && authType=='register') {
+       return res.send('This user is already exist, try to get login.')
+    } else if(user && authType=='login') {
+        const tokenApp=jwt.sign({
+            id:user.id,
+            role:user.role,
+          },'secret')
+     return  res.json({email,role:"USER", token:tokenApp})
+    }
 
-    // console.log(typeof(email),email)
-    // console.log('emailData',await emailData.json())
-    // console.log('Data:',access_token)
-     res.json({email,role:"USER", token:tokenApp})
-    // res.send({email:email})
+
+    
+    
+
 })
 
 app.post('/facebook', async(req,res)=>{
-    const {code} = req.body
+    const {code, authType} = req.body
     console.log('Code',code)
-    const url = `https://graph.facebook.com/v9.0/oauth/access_token?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${process.env.FRONTEND_URL}/auth/?provider=facebook&client_secret=${process.env.FACEBOOK_CLIENT_SECRET}&code=${code}`
+    const url = `https://graph.facebook.com/v9.0/oauth/access_token?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${process.env.FRONTEND_URL}/auth/?provider=facebook-${authType}&client_secret=${process.env.FACEBOOK_CLIENT_SECRET}&code=${code}`
     let data = await fetch(url)
     const {access_token} = await data.json()
     // &fields=email,name
     const url2 =`https://graph.facebook.com/me?access_token=${access_token}&fields=email,name`
     let data2 = await fetch(url2)
     const {email,id} = await data2.json()
-    let user = await prisma.user.findOne({
+    let user = await prisma.user.findUnique({
         where:{
             facebookId:id,
         },
@@ -78,24 +88,53 @@ app.post('/facebook', async(req,res)=>{
             role:true
         }
     })
-    if(!user)
-     user = await prisma.user.create({
-        data:{
-            facebookId:id,
-            email:email,
-        },
-        select:{
-            id:true,
-            role:true
-        }
-    }) 
-    
-    const tokenApp=jwt.sign({
+
+    if(!user && authType=='register') {
+        user = await prisma.user.create({
+           data:{
+               facebookId:id,
+               email:email,
+           },
+           select:{
+               id:true,
+               role:true
+           }
+       }) 
+       const tokenApp=jwt.sign({
         id:user.id,
         role:user.role,
-    },'secret')
+      },'secret')
+      return res.json({email,role:"USER", token:tokenApp})
+    }
+    else if(!user && authType=='login') {
+        return res.send('This user is not found. Try to register a new account.')
+    } else if(user && authType=='register') {
+        return res.send('This user is already exist, try to get login.')
+    } else if(user && authType=='login') {
+        const tokenApp=jwt.sign({
+            id:user.id,
+            role:user.role,
+          },'secret')
+      return  res.json({email,role:"USER", token:tokenApp})
+    }
+    // if(!user)
+    //  user = await prisma.user.create({
+    //     data:{
+    //         facebookId:id,
+    //         email:email,
+    //     },
+    //     select:{
+    //         id:true,
+    //         role:true
+    //     }
+    // }) 
+    
+    // const tokenApp=jwt.sign({
+    //     id:user.id,
+    //     role:user.role,
+    // },'secret')
 
-    res.json({email,role:"USER", token:tokenApp})
+    // res.json({email,role:"USER", token:tokenApp})
 
 })
 
@@ -108,7 +147,7 @@ let data = await fetch(url)
 // const access_token = await data.json()
 const {access_token, user_id ,email} = await data.json()
 console.log('accessToken',access_token,'User ID',user_id, 'Email', email)
-let user = await prisma.user.findOne({
+let user = await prisma.user.findUnique({
     where:{
         VKId:user_id
     },

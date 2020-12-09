@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.2",
-    "@prisma/client": "^2.5.1",
+    "@prisma/client": "^2.13.0",
     "aws-sdk": "^2.766.0",
     "axios": "^0.19.2",
     "bcrypt": "^5.0.0",

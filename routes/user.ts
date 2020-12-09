@@ -40,7 +40,7 @@ app.get('/users',isAuth,isAdmin, async(req,res)=>{
 })
 
 app.get('/profile',isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
-  const profile = await prisma.instructorProfile.findOne({
+  const profile = await prisma.instructorProfile.findUnique({
     where:{
       id:req.user.instructorId
     },
@@ -52,7 +52,7 @@ app.get('/profile',isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>
   res.json({...profile})
 })
 app.get('/publicprofile/:id', async (req,res)=>{
-  const profile = await prisma.instructorProfile.findOne({
+  const profile = await prisma.instructorProfile.findUnique({
     where:{
       id:+req.params.id
     },
@@ -67,22 +67,12 @@ app.get('/publicprofile/:id', async (req,res)=>{
 
   res.json(profile)
 })
-// app.get('/publicprofileofcourse/:id', async(req,res)=>{
-//   const publicprofile = await prisma.instructorProfile.findOne({
-//     where:{
-//       id
-//     }
-//   })
-// })
+
 app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
   const profileData = req.body
 
   console.log(profileData)
-  // console.log(profileData)
-  // return
-  // console.log(avatar)
-  // console.log('Hey')
-  // console.log(profilename)
+
   const profile = await prisma.instructorProfile.update({
     where:{
       id:req.user.instructorId

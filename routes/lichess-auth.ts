@@ -53,11 +53,12 @@ app.get('/callback', async (req, res) => {
     const userEmail = await getUserEmail(token.token);
     const email = userEmail.data.email
     const data = userInfo.data
-    console.log(data)
+    console.log('data', data , 'email', email)
+    // console.log(data)
     const {title, id} = data
-    console.log('id',id)
-    console.log('title',title)
-    const user = await prisma.user.findOne({
+    // console.log('id',id)
+    // console.log('title',title)
+    const user = await prisma.user.findUnique({
       where:{
         lichessId:id 
       },
@@ -81,6 +82,7 @@ app.get('/callback', async (req, res) => {
           data:{
             lichessId:id,
             role:"TEACHER",
+            email:email,
             instructorProfile:{
               create:{
                 title
@@ -106,13 +108,16 @@ app.get('/callback', async (req, res) => {
          newUser = await prisma.user.create({
           data:{
             lichessId:id,
-            role:"USER"
+            role:"USER",
+            email:email,
           },
         })
+        
         const tokenApp=jwt.sign({
           id:newUser.id,
           role:"USER"
         },'secret')
+        console.log('Super',email,tokenApp)
         return res.json({email,role:"USER", token:tokenApp})
       } 
       
