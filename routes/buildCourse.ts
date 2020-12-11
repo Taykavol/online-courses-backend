@@ -251,6 +251,7 @@ app.get('/:id/preview',async(req,res)=>{
     // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
 
 })
+
 // Get reviews
 app.get('/:id/review', async(req,res)=>{
     const reviews = await prisma.review.findMany({
@@ -305,9 +306,17 @@ app.put('/publish/:id', isAuth,isAdmin, async(req,res)=>{
             id:+req.params.id
         },
         data:{
-            status:"PUBLISH"
+            status:"PUBLISH",
+            author:{
+                update:{
+                    publishedCourses:{
+                        increment:1
+                    }
+                }
+            }
         }
     })
+
     res.json(course)
    })
 // Sent to verification by user.

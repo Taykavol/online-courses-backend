@@ -42,20 +42,25 @@ const app = Router();
 // Redirect URI: parse the authorization token and ask for the access token
 app.get('/callback', async (req, res) => {
   try {
-    console.log(req.query.code)
+    // console.log(req.query.code, req.query.state)
+    
+    // const userToken =req.headers.authorization && req.headers.authorization.split(' ')[1]
+    // console.log('token',userToken, req.headers)
+    // console.log(req.query.code)
     const result = await oauth2.authorizationCode.getToken({
       code: req.query.code,
       redirect_uri: redirectUri
     });
-    console.log('res',result);
-    const token = oauth2.accessToken.create(result);
-    const userInfo = await getUserInfo(token.token);
-    const userEmail = await getUserEmail(token.token);
-    const email = userEmail.data.email
+    console.log('res',result,result.access_token);
+    // const token = oauth2.accessToken.create(result);
+    const userInfo = await getUserInfo(result.access_token);
     const data = userInfo.data
-    console.log('data', data , 'email', email)
+    const userEmail = await getUserEmail(result.access_token);
+    const email = userEmail.data.email
+    // console.log('data', data , 'email', email)
     // console.log(data)
     const {title, id} = data
+
     // console.log('id',id)
     // console.log('title',title)
     const user = await prisma.user.findUnique({
@@ -138,13 +143,13 @@ app.get('/callback', async (req, res) => {
 function getUserInfo(token) {
   return axios.get('/api/account', {
     baseURL: 'https://lichess.org/',
-    headers: { 'Authorization': 'Bearer ' + token.access_token }
+    headers: { 'Authorization': 'Bearer ' + token }
   });
 }
 function getUserEmail(token) {
     return axios.get('/api/account/email', {
       baseURL: 'https://lichess.org/',
-      headers: { 'Authorization': 'Bearer ' + token.access_token }
+      headers: { 'Authorization': 'Bearer ' + token }
     });
   }
 export default app

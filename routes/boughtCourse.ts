@@ -308,6 +308,8 @@ app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
 })
 // Review course
 app.post('/:id/review',isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
+const {review,reviewMessage,authorName,reviewSubtitle} = req.body
+if(!(review==1||review==2||review==3||review==4||review==5)) return res.json(' Something wrong with review')
 const course = await prisma.boughtCourse.findUnique({
     where:{
         id:+req.params.id
@@ -319,17 +321,22 @@ const course = await prisma.boughtCourse.findUnique({
         course:{
             select:{
                 reviewStats:true,
+                author:{
+                    select:{
+                        totalReviews:true,
+                        instructorRating:true,
+                    }
+                }
             }
         }
     }
 })
 if(course.userId!=req.user.id) return res.json('You are not owner')
 if(course.review) return res.json('You have already voted')
-const {review,reviewMessage,authorName,reviewSubtitle} = req.body
+
 
 course.course.reviewStats[review-1]++
 const avgRating = course.course.reviewStats.reduce((acc,val,index)=>acc+val*(index+1))/course.course.reviewStats.reduce((acc,val)=>acc+val)
-
 const newReview = await prisma.review.create({
     data:{
         review,
@@ -358,10 +365,23 @@ const updatedCourse = await prisma.course.update({
         },
         averageRating:{
             set:avgRating
+        },
+        searchRating:{
+            increment:(review-4)*5
+        },
+        author:{
+            update:{
+                totalReviews:{
+                    increment:1
+                },
+                instructorRating:{
+                    set:(course.course.author.instructorRating*course.course.author.totalReviews+review)/(course.course.author.totalReviews+1)
+                },
+            }
         }
-        
-    }
+    },
 })
+// const updatedProfile = await pr
 
 res.json('Good')
 })
