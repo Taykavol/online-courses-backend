@@ -6,6 +6,7 @@ function isAuth(req,res,next) {
     jwt.verify(token, 'secret',(error,user)=>{
       if(error) return res.json(error)
       req.user = user
+      console.log('User',req.user.id)
       next()
     })
   }
