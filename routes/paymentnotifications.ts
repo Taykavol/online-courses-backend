@@ -122,7 +122,7 @@ app.post('/',async (req,res)=>{
             })
             const updatedCourse = await prisma.course.update({
                 where:{
-                    id:object.metadata.courseId
+                    id:+object.metadata.courseId
                 },
                 data:{
                     registedStudents:{
