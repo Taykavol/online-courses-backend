@@ -11,7 +11,9 @@ const app = Router();
 //     console.log('Payment was succeed.' )
 // })
 app.post('/',async (req,res)=>{
-    console.log(req)
+    // console.log(req)
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log('ip', ip)
     const {object} = req.body
     const payment_id = object.id
     const status = object.status
@@ -21,7 +23,6 @@ app.post('/',async (req,res)=>{
     //         username:"770033",
     //         password:"test_j9KT3bKM3pRLIa4Nxhmd-Yf6fMMhxkPyBE4xjq1NAgw"
     //     }})
-        
     // }
     // console.log('bodyPost',req.body)
     // console.log('Payment was succeed.Post' )
