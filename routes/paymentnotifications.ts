@@ -21,34 +21,41 @@ app.post('/',async (req,res)=>{
     const idempotenceKey = uuidv4();
 
     console.log('status',status , 'payment_id',payment_id )
-    if(status=='waiting_for_capture') {
-        const confirm = await Axios({
-            url:`https://api.yookassa.ru/v3/payments/${payment_id}/capture`,
-            auth:{
-                username:"770033",
-                password:"test_j9KT3bKM3pRLIa4Nxhmd-Yf6fMMhxkPyBE4xjq1NAgw"
-            }, 
-            headers:{
-                'Idempotence-Key':idempotenceKey,
-                'Content-Type': 'application/json'
-            },
-            data:{
-                amount: object.amount
-            }
-        })
-        console.log('confirm',confirm)
+    try {
+        if(status=='waiting_for_capture') {
+            const confirm = await Axios({
+                url:`https://api.yookassa.ru/v3/payments/${payment_id}/capture`,
+                method:"POST",
+                auth:{
+                    username:"770033",
+                    password:"test_j9KT3bKM3pRLIa4Nxhmd-Yf6fMMhxkPyBE4xjq1NAgw"
+                }, 
+                headers:{
+                    'Idempotence-Key':idempotenceKey,
+                    'Content-Type': 'application/json'
+                },
+                data:{
+                    amount: object.amount
+                }
+            })
+            console.log('confirm',confirm)
+            return res.status(200).send()
+        }
+    
+        if(status=='succeeded') {
+
+            console.log('course was bought!')
+            return res.status(200).send()
+            // Выдать курс
+        }
+    } catch (error) {
+        console.log(error)
         return res.status(200).send()
     }
 
-    if(status=='succeeded') {
-
-        console.log('course was bought!')
-        // Выдать курс
-    }
-    
     // console.log('bodyPost',req.body)
     // console.log('Payment was succeed.Post' )
-    res.status(200).send()
+    
 })
 
 export default app;
