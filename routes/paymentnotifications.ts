@@ -48,12 +48,12 @@ app.post('/',async (req,res)=>{
                 data:{
                      user:{
                          connect:{
-                             id:object.metadata.buyerId
+                             id:+object.metadata.buyerId
                          }
                      },
                      course:{
                          connect:{
-                             id:object.metadata.courseId
+                             id:+object.metadata.courseId
                          }
                      }
                 },
@@ -77,12 +77,12 @@ app.post('/',async (req,res)=>{
                 data:{
                     course:{
                         connect:{
-                            id:object.metadata.courseId
+                            id:+object.metadata.courseId
                         }
                     },
                     buyer:{
                         connect:{
-                            id:object.metadata.buyerId
+                            id:+object.metadata.buyerId
                         }
                     },
                     seller:{
