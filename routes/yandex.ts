@@ -65,7 +65,7 @@ app.post('/payment/',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
     },
     confirmation: {
         type: 'redirect',
-        return_url: `${process.env.FRONTEND_URL}/learning`
+        return_url: `${process.env.FRONTEND_URL}/coursebought/${courseId}`
     },
     metadata:{
       courseId:courseId,
@@ -74,6 +74,7 @@ app.post('/payment/',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
   }})
   console.log(result.data)
     if( result.data.confirmation.confirmation_url) return res.json({confirmation_url:result.data.confirmation.confirmation_url})
+    // if(result.data==t)
       res.json('bad')
   // console.log('easy',good)
 //  console.log(idempotenceKey)

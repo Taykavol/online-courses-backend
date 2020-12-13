@@ -104,6 +104,20 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     res.json(boughtCourse)
     // clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
 })
+// Get 1 course by CourseId
+app.get('/course/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=> {
+    const user = await prisma.user.findUnique({
+        where:{
+            id:req.user.id
+        },
+        select:{
+            boughtCourses:true
+        }
+    })
+    const course = user.boughtCourses.find(boughtCourse=>boughtCourse.courseId==+req.params.id)
+    if(course) return res.json({body:'Course is bought, redirect'})
+    res.json({error:'Try to resend request.'})
+})
 // Get 1 course
 app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     // setTimeout(()=>{
