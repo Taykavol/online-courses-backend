@@ -13,17 +13,40 @@ app.get('/all', async (req,res)=>{
             }
         },
         select:{
-            avatar:true,
+            avatarBackground:true,
             totalReviews:true,
             instructorRating:true,
             registedStudents:true,
             publishedCourses:true,
             teacherName:true,
-            title:true
+            title:true,
+            id:true,
+            aboutMe:true,
         }
     })
     console.log(profiles)
     res.send(profiles)
+})
+
+app.get('/:id', async(req,res)=>{
+    const profile =  await prisma.instructorProfile.findUnique({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            avatarBackground:true,
+            totalReviews:true,
+            instructorRating:true,
+            registedStudents:true,
+            publishedCourses:true,
+            teacherName:true,
+            title:true,
+            id:true,
+            aboutMe:true,
+        }
+    })
+    console.log(profile)
+    res.send(profile)
 })
 
 

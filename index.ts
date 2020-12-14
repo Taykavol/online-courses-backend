@@ -26,9 +26,9 @@ const app = express()
 // app.use('/public',express.static('public',{
 //     maxAge:30000
 // }));
-// app.use(compression())
 app.use(cors())
 app.use(express.json())
+// app.use(compression())
 // app.use('/files', express.static(path.join(__dirname,'public')))
 
 

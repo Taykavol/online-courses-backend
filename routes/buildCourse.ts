@@ -9,18 +9,18 @@ import AWS from "aws-sdk";
 
 import multer from 'multer'
 
-const fileStorage = multer.diskStorage({
-    destination(req,file,cb) {
-        cb(null,'public/images/course')
-    },
-    filename(req,file,cb) {
-        cb(null,file.fieldname+req.params.id+'.jpg')
-    }
-})
+// const fileStorage = multer.diskStorage({
+//     destination(req,file,cb) {
+//         cb(null,'public/images/course')
+//     },
+//     filename(req,file,cb) {
+//         cb(null,file.fieldname+req.params.id+'.jpg')
+//     }
+// })
 
 var storage = multer.memoryStorage()
 const upload2 = multer({ storage: storage }).single('image')
-const upload = multer({ storage: fileStorage }).single('image')
+// const upload = multer({ storage: fileStorage }).single('image')
 
 
 // const { promisify } = require("util");
@@ -166,6 +166,32 @@ app.get('/recommended', async (req,res)=>{
                 }
             }
         }
+    })
+    res.json(courses)
+})
+// Get all published courses of author
+app.get('/:authorId/published', async(req,res)=>{
+    const courses = await prisma.course.findMany({
+        where:{
+            status:"PUBLISH",
+            authorId:+req.params.authorId
+        },
+        // select:{
+            // author:{
+            //     select:{
+            //         teacherName:true,
+            //         title:true,
+            //         aboutMe:true,
+            //         avatar:true,
+            //         registedStudents:true,
+            //         publishedCourses:true,
+            //     },
+            // },
+            // price:true,
+            // averageRating:true,
+            // title:true,
+
+        // }
     })
     res.json(courses)
 })
@@ -391,6 +417,7 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
         }           // successful response
      })
 })
+
 // Teacher
 app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
@@ -443,6 +470,52 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
             })
             res.send("ok");
 
+        }           // successful response
+     })
+})
+app.patch('/teacher2',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
+
+    AWS.config.loadFromPath('./utils/aws/config.json')
+    const s3 = new AWS.S3({})
+    const teacher = await prisma.instructorProfile.findUnique({
+        where:{
+            id:req.user.instructorId
+        },
+        select:{
+            avatarBackground:true,
+        }
+    })
+    if(teacher.avatarBackground)  {
+        // console.log(req.course.pictureUri)
+            s3.deleteObject({
+                Bucket: "chess-courses",
+                Key:teacher.avatarBackground
+            },(err,data)=>{
+                console.log(err)
+                console.log('was deleted')
+                console.log(data)
+            })
+    }
+    const AWSKey = `teacher2/${uuidv4()}image${req.user.instructorId}.jpg`
+    s3.putObject({
+        Body: req.file.buffer,
+        Bucket: "chess-courses",
+        Key: AWSKey,
+        ContentType:"image/jpeg",
+        ACL: 'public-read',
+        CacheControl:"max-age=2628000"
+     }, async function(err, data){
+        if (err) throw err; // an error occurred
+        else  {
+            await prisma.instructorProfile.update({
+                where:{
+                    id:req.user.instructorId
+                },
+                data:{
+                    avatarBackground:AWSKey
+                }
+            })
+            res.send("ok");
         }           // successful response
      })
 })

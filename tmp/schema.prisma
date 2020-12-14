@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:3524@localhost:5432"
   // url = "postgres://lpzgkancxbbueg:f96d5382c1d5304e01344f1c93d24f74547a3416189c155f5d0c2b4986817a92@ec2-99-81-238-134.eu-west-1.compute.amazonaws.com:5432/d22jf9e516jccm"
   // url = "postgresql://postgres:3524@localhost:5432"
 }
@@ -34,7 +34,6 @@ model instructorProfile{
   profit Float @default(0.5)
   invoices Invoice[]
   avatar String?
-  avatarBackground String?
   aboutMe String?
   publishedCourses Int @default(0)
   registedStudents Int @default(0)

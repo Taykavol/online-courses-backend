@@ -8,7 +8,8 @@
     "dev": "nodemon  index.ts  ",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deployapp": "git add . && git commit -m 'Fixed' & git push heroku master "
+    "deployapp": "git add . && git commit -m 'Fixed' & git push heroku master ",
+    "prisma-migrate-locally": "npx prisma db push --preview-feature --schema=tmp/schema.prisma"
   },
   "engines": {
     "node": "14.15.1"
