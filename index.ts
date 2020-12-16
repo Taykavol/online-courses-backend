@@ -1,6 +1,9 @@
 
 if (process.env.NODE_ENV !== 'production')
 require('dotenv').config()
+
+console.log(process.env.NODE_ENV)
+console.log(process.env.FRONTEND_URL,'URL')
 // require('dotenv').config()
 import express from 'express'
 // import compression from "compression"
@@ -17,7 +20,6 @@ import routerLichess from "./routes/lichess-auth"
 import invoices from './routes/invoices'
 import profile from './routes/profile'
 import yandex from './routes/yandex'
-import paymentnotifications from './routes/paymentnotifications'
 
 const app = express()
 
@@ -50,7 +52,7 @@ app.use('/auth',authRoutes)
 app.use('/invoices',invoices)
 app.use('/profile',profile)
 app.use('/yandex',yandex)
-app.use('/paymentnotifications',paymentnotifications)
+// app.use('/paymentnotifications',paymentnotifications)
 
 let PORT = process.env.PORT || 4000
 app.listen(PORT, ()=>{

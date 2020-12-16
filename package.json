@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "BACKEND_URL=https://chess-courses.com SANDBOX_PAYPAL_CLIENT=AQecO_cPaI4jsY-S7rBVo0QxhQv_NP7gzZML2kACL8P6LqDWabpeo1JfkLFuwFYl3zRG6wB7cxu2h7NO SANDBOX_PAYPAL_SECRET=EG-hodPsZAQLp-n1gCDfvOBbO0DcFpjxlErH66aoHimbxzHb2K5iDSAKcxMxBZ5CSXnN5Pm-65VWSutO GOOGLE_CLIENT_ID=231498108232-bqrk6v0pmvnm8o8igcn6en22f42g41ls.apps.googleusercontent.com GOOGLE_CLIENT_SECRET=QrwdEA1hK-BYzVXEYCDM-AiY FACEBOOK_CLIENT_ID=314836566324405 FACEBOOK_CLIENT_SECRET=de3c97ceb2199cd7ec2d8d051468c33d VK_CLIENT_SECRET=b2IxFuAeN0hKXFKIG4BC VK_CLIENT_ID=7678450  FRONTEND_URL=https://chess-courses.com BINANCE_CLIENT=agFahL6k7F55ISeuW4WsArjgyJkNeTTuqS31EpqmCLNHYXUDt5bfPdglMnld9b2Q node dist/index.js ",
-    "dev": "nodemon  index.ts  ",
+    "start": "pm2 restart ecosystem.config.js --env production ",
+    "dev": "pm2 restart ecosystem.config.js --env development  ",
+    "nodemon": "nodemon index.ts",
     "postinstall": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "commit":"git add . && git commit -m 'Fixed' && git push origin master",
     "deployapp": "git add . && git commit -m 'Fixed' & git push heroku master ",
     "prisma-migrate-locally": "npx prisma db push --preview-feature --schema=tmp/schema.prisma"
   },
@@ -48,7 +50,6 @@
     "redis": "^3.0.2",
     "simple-oauth2": "^1.5.2",
     "uuid": "^8.3.0",
-    "vimeo": "^2.1.1",
-    "yandex-checkout": "^1.0.13"
+    "vimeo": "^2.1.1"
   }
 }
