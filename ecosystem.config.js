@@ -13,7 +13,8 @@ module.exports = {
       FACEBOOK_CLIENT_SECRET:"de3c97ceb2199cd7ec2d8d051468c33d",
       VK_CLIENT_ID:"7678450",
       VK_CLIENT_SECRET:"b2IxFuAeN0hKXFKIG4BC",
-      s3Url:"https://chess-courses.hb.bizmrg.com"   
+      s3Url:"https://chess-courses.hb.bizmrg.com",
+      DATABASE_URL:"postgresql://postgres:3524@localhost:5432"
     },
     env_production: {
       NODE_ENV: "production",
@@ -26,7 +27,8 @@ module.exports = {
       FACEBOOK_CLIENT_SECRET:"de3c97ceb2199cd7ec2d8d051468c33d",
       VK_CLIENT_ID:"7678450",
       VK_CLIENT_SECRET:"b2IxFuAeN0hKXFKIG4BC",
-      s3Url:"https://chess-courses.hb.bizmrg.com" 
+      s3Url:"https://chess-courses.hb.bizmrg.com",
+      DATABASE_URL:"postgres://user1:35243524@rc1b-nswu5hhegloor430.mdb.yandexcloud.net:6432/db1"
     }
   }],
 
