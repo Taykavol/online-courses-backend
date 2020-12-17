@@ -41,8 +41,8 @@ app.get('/',(req,res)=>{
     const clientIp = requestIp.getClientIp(req)
     console.log('IP',clientIp, req.connection.remoteAddress, req.headers['x-forwarded-for'],req.headers['X-Real-IP'])
     const ip:any = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const address = new Address6(ip)
-    console.log(address.subnetMask , address.mask())
+    // const address = new Address6(ip)
+    // console.log(address.subnetMask , address.mask())
     // address.subnetMask()
   console.log('ip', ip)
     res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}`)
