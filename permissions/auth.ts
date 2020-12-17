@@ -22,6 +22,7 @@ function isAuth(req,res,next) {
   // }
 
   function isInstructor(req,res,next) {
+    console.log(req.user.instructorId)
     if(req.user.instructorId) return next()
     res.json('You are not teacher')
   }
