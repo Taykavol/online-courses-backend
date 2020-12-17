@@ -45,7 +45,7 @@ app.get('/',(req,res)=>{
     // console.log(address.subnetMask , address.mask())
     // address.subnetMask()
   console.log('ip', ip)
-    res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}${req.headers}`)
+    res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}${JSON.stringify(req.headers) }`)
     
 })
 
