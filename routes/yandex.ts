@@ -230,7 +230,9 @@ app.post('/ip',(req,res)=>{
     // 2a02:5180:0:2669::/64
     
     const ip:any = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const adress = new Address6(ip)
+    const address = new Address6(ip)
+    console.log(address.subnetMask , address.mask())
+    // address.subnetMask()
   console.log('ip', ip)
   res.status(200).send()
 })
