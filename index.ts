@@ -37,7 +37,15 @@ app.use(express.json())
 
 app.get('/',(req,res)=>{
     console.log(req.app.get('yoy'))
-    res.json({env:process.env.NODE_ENV,binance:process.env.BINANCE_CLIENT})
+    const requestIp = require('request-ip');
+    const clientIp = requestIp.getClientIp(req)
+    console.log('IP',clientIp, req.connection.remoteAddress, req.headers['x-forwarded-for'],req.headers['X-Real-IP'])
+    const ip:any = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const address = new Address6(ip)
+    console.log(address.subnetMask , address.mask())
+    // address.subnetMask()
+  console.log('ip', ip)
+    res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}`)
     
 })
 
