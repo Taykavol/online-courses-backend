@@ -22,7 +22,7 @@ import profile from './routes/profile'
 import yandex from './routes/yandex'
 
 const app = express()
-
+app.set('trust proxy', true)
 
 // const upload = multer({ storage: fileStorage })
 // app.use('/public',express.static('public',{
