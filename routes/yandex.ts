@@ -2,6 +2,7 @@ import {  Router ,Request } from "express";
 import {PrismaClient} from "@prisma/client"
 import {v4 as uuidv4} from 'uuid'
 import {isAuth} from '../permissions/auth'
+import  {Address6} from 'ip-address'
 
 import Axios from "axios";
 
@@ -218,7 +219,21 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
     if( result.data.confirmation.confirmation_url) return res.json({confirmation_url:result.data.confirmation.confirmation_url})
       res.json('bad')
 })
-
+app.post('/ip',(req,res)=>{
+    // 185.71.76.0/27
+    // 185.71.77.0/27
+    // 77.75.153.0/25
+    // 77.75.154.128/25
+    // 2a02:5180:0:1509::/64
+    // 2a02:5180:0:2655::/64
+    // 2a02:5180:0:1533::/64
+    // 2a02:5180:0:2669::/64
+    
+    const ip:any = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const adress = new Address6(ip)
+  console.log('ip', ip)
+  res.status(200).send()
+})
 
 export default app;
 
