@@ -39,13 +39,13 @@ app.get('/',(req,res)=>{
     console.log(req.app.get('yoy'))
     const requestIp = require('request-ip');
     const clientIp = requestIp.getClientIp(req)
-    console.log('IP',clientIp, req.connection.remoteAddress, req.headers['x-forwarded-for'],req.headers['X-Real-IP'])
+    console.log('IP',clientIp, req.connection.remoteAddress, req.headers['x-forwarded-for'],req.headers['connection'],req.headers['X-Real-IP'])
     const ip:any = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     // const address = new Address6(ip)
     // console.log(address.subnetMask , address.mask())
     // address.subnetMask()
   console.log('ip', ip)
-    res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}`)
+    res.send(`${clientIp}${req.connection.remoteAddress}${req.headers['x-forwarded-for']}${req.headers['X-Real-IP']}${req.headers}`)
     
 })
 
