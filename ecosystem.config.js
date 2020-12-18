@@ -28,7 +28,7 @@ module.exports = {
       VK_CLIENT_ID:"7678450",
       VK_CLIENT_SECRET:"b2IxFuAeN0hKXFKIG4BC",
       s3Url:"https://chess-courses.hb.bizmrg.com",
-      DATABASE_URL:"postgres://user1:35243524@rc1b-nswu5hhegloor430.mdb.yandexcloud.net:6432/db1"
+      DATABASE_URL:"postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1"
     }
   }],
 
