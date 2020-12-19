@@ -59,7 +59,7 @@ app.use('/payment',payment)
 app.use('/auth',authRoutes)
 app.use('/invoices',invoices)
 app.use('/profile',profile)
-app.use('/yandex',yandex)
+app.use('/checkout',yandex)
 // app.use('/paymentnotifications',paymentnotifications)
 
 let PORT = process.env.PORT || 4000

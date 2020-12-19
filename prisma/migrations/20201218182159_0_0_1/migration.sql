@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "public"."Payment" AS ENUM ('NO', 'PAYPAL', 'BINANCE');
+CREATE TYPE "public"."Payment" AS ENUM ('NO', 'PAYPAL');
 
 -- CreateEnum
 CREATE TYPE "public"."InvoiceStatus" AS ENUM ('PAYOUT', 'PENDING');
@@ -26,10 +26,11 @@ CREATE TABLE "User" (
     "email" TEXT,
     "password" TEXT,
     "lichessId" TEXT,
-    "isBanned" BOOLEAN NOT NULL DEFAULT false,
     "googleId" TEXT,
     "facebookId" TEXT,
     "VKId" INTEGER,
+    "isBanned" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
 );
@@ -37,14 +38,17 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "instructorProfile" (
 "id" SERIAL,
-    "userId" INTEGER,
-    "teacherName" TEXT,
+    "userId" INTEGER NOT NULL,
+    "teacherName" TEXT DEFAULT E'',
     "title" "Title",
     "profit" DECIMAL(65,30) NOT NULL DEFAULT 0.5,
-    "registedStudents" INTEGER NOT NULL DEFAULT 0,
     "avatar" TEXT,
+    "avatarBackground" TEXT,
     "aboutMe" TEXT,
     "publishedCourses" INTEGER NOT NULL DEFAULT 0,
+    "registedStudents" INTEGER NOT NULL DEFAULT 0,
+    "instructorRating" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "totalReviews" INTEGER NOT NULL DEFAULT 0,
     "paypalId" TEXT,
     "paymentMethod" "Payment" NOT NULL DEFAULT E'NO',
 
@@ -56,11 +60,11 @@ CREATE TABLE "BoughtCourse" (
 "id" SERIAL,
     "userId" INTEGER NOT NULL,
     "courseId" INTEGER NOT NULL,
+    "progressOfLessons" BOOLEAN[],
+    "progressOfPuzzles" BOOLEAN[],
     "progress" INTEGER NOT NULL DEFAULT 0,
     "lastSeen" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reviewId" INTEGER,
-    "progressOfLessons" BOOLEAN[],
-    "progressOfPuzzles" BOOLEAN[],
 
     PRIMARY KEY ("id")
 );
@@ -96,26 +100,26 @@ CREATE TABLE "Course" (
     "title" TEXT NOT NULL DEFAULT E'',
     "subtitle" TEXT NOT NULL DEFAULT E'',
     "authorId" INTEGER,
+    "description" JSONB,
+    "forWho" TEXT DEFAULT E'',
+    "whatStudentsGet" TEXT DEFAULT E'',
     "category" "Category" NOT NULL DEFAULT E'BASICS',
+    "level" INTEGER[],
+    "sentences" TEXT[],
     "status" "Status" DEFAULT E'BUILDING',
+    "videos" TEXT[],
+    "registedStudents" INTEGER NOT NULL DEFAULT 0,
     "lessons" INTEGER,
     "duration" INTEGER DEFAULT 0,
     "price" DECIMAL(65,30) NOT NULL DEFAULT 20,
-    "curriculum" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "registedStudents" INTEGER NOT NULL DEFAULT 0,
-    "reviewStats" INTEGER[],
-    "videos" TEXT[],
     "pictureUri" TEXT,
     "promoVideo" TEXT,
     "totalPuzzles" INTEGER NOT NULL DEFAULT 0,
     "averageRating" DECIMAL(65,30) NOT NULL DEFAULT 0,
-    "level" INTEGER[],
-    "sentences" TEXT[],
-    "forWho" TEXT DEFAULT E'',
-    "whatStudentsGet" TEXT DEFAULT E'',
-    "description" JSONB,
+    "reviewStats" INTEGER[],
+    "curriculum" TEXT,
     "searchRating" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
 );
@@ -126,8 +130,9 @@ CREATE TABLE "Review" (
     "courseId" INTEGER NOT NULL,
     "review" INTEGER NOT NULL,
     "reviewMessage" TEXT,
-    "authorName" TEXT,
     "reviewSubtitle" TEXT,
+    "authorName" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
 );
@@ -145,19 +150,22 @@ CREATE UNIQUE INDEX "User.facebookId_unique" ON "User"("facebookId");
 CREATE UNIQUE INDEX "User.VKId_unique" ON "User"("VKId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "instructorProfile.userId_unique" ON "instructorProfile"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "BoughtCourse.reviewId_unique" ON "BoughtCourse"("reviewId");
+CREATE UNIQUE INDEX "instructorProfile_userId_unique" ON "instructorProfile"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BoughtCourse.userId_courseId_unique" ON "BoughtCourse"("userId", "courseId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "BoughtCourse_reviewId_unique" ON "BoughtCourse"("reviewId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Invoice.month_year_profileId_unique" ON "Invoice"("month", "year", "profileId");
 
 -- AddForeignKey
-ALTER TABLE "instructorProfile" ADD FOREIGN KEY("userId")REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "instructorProfile" ADD FOREIGN KEY("userId")REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BoughtCourse" ADD FOREIGN KEY("userId")REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BoughtCourse" ADD FOREIGN KEY("courseId")REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -166,13 +174,10 @@ ALTER TABLE "BoughtCourse" ADD FOREIGN KEY("courseId")REFERENCES "Course"("id") 
 ALTER TABLE "BoughtCourse" ADD FOREIGN KEY("reviewId")REFERENCES "Review"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BoughtCourse" ADD FOREIGN KEY("userId")REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD FOREIGN KEY("courseId")REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD FOREIGN KEY("buyerId")REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Order" ADD FOREIGN KEY("courseId")REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD FOREIGN KEY("sellerId")REFERENCES "instructorProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;

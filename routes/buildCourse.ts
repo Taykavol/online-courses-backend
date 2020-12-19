@@ -60,27 +60,23 @@ app.get('/verified', isAuth,isAdmin, async(req,res)=>{
      where:{
          status:{
              equals:"VERIFYING"
-         }
+         },
+     },
+     include:{
+         author:true
      }
  })
  res.json(courses)
 })
-//Get all published course for main page
-app.get('/published', async(req,res)=>{
-    console.log(req.path)
-    
-    // client.set('chess','noname',console.log)
-    
-    // prisma.$use(async (params, next)=>{
-    //  clientRedis.flushall()
 
-    //   const redisCourse = await clientRedis.get(req.path)
+//Get all published course for main page
+app.get('/newest', async (req,res)=>{
+    // const redisCourse = await clientRedis.get(req.path)
     //   if(redisCourse) {
     //     console.log('FROM REDIS')
     //     const course:JSON = JSON.parse(redisCourse)
     //     return res.json(course)
     //   } 
-    //   console.log('FROM DB')
     
     const courses = await prisma.course.findMany({
         where:{
@@ -99,75 +95,9 @@ app.get('/published', async(req,res)=>{
             }
         }
     })
-    // clientRedis.flushall()
-    
-    res.json(courses) 
-    // clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
-    
-    // res.json(courses) 
-    // client.set('courses', JSON.stringify(courses))
-})
-// Newest
-app.get('/newest', async (req,res)=>{
-    // const redisCourse = await clientRedis.get(req.path)
-    //   if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     const course:JSON = JSON.parse(redisCourse)
-    //     return res.json(course)
-    //   } 
-    const courses = await prisma.course.findMany({
-        include:{
-            author:{
-                select:{
-                    teacherName:true,
-                    title:true,
-                    aboutMe:true,
-                    avatar:true,
-                    registedStudents:true,
-                    publishedCourses:true,
-                }
-            }
-        }
-    })
     res.json(courses)
     // clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
 
-})
-// Top
-app.get('/top', async (req,res)=>{
-    const courses = await prisma.course.findMany({
-        include:{
-            author:{
-                select:{
-                    teacherName:true,
-                    title:true,
-                    aboutMe:true,
-                    avatar:true,
-                    registedStudents:true,
-                    publishedCourses:true,
-                }
-            }
-        }
-    })
-    res.json(courses)
-})
-// Recommended
-app.get('/recommended', async (req,res)=>{
-    const courses = await prisma.course.findMany({
-        include:{
-            author:{
-                select:{
-                    teacherName:true,
-                    title:true,
-                    aboutMe:true,
-                    avatar:true,
-                    registedStudents:true,
-                    publishedCourses:true,
-                }
-            }
-        }
-    })
-    res.json(courses)
 })
 // Get all published courses of author
 app.get('/:authorId/published', async(req,res)=>{
@@ -195,15 +125,8 @@ app.get('/:authorId/published', async(req,res)=>{
     })
     res.json(courses)
 })
-//Get list of courses
+//Get list of courses for specific instructor
 app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-    //  clientRedis.flushall()
-    // if(!req.user.instructorId) return res.json('Finnish')
-    // const courses = await clientRedis.get(`myCourses${req.user.instructorId}`)
-    // if(courses)  {
-    //     console.log('FROM REDIS')
-    //     return res.json(JSON.parse(courses))
-    // }
     const myCourses = await prisma.course.findMany({
        where:{
             authorId:req.user.instructorId
@@ -277,7 +200,6 @@ app.get('/:id/preview',async(req,res)=>{
     // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
 
 })
-
 // Get reviews
 app.get('/:id/review', async(req,res)=>{
     const reviews = await prisma.review.findMany({
@@ -417,8 +339,7 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
         }           // successful response
      })
 })
-
-// Teacher
+// Teacher photo without background
 app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
     // var storage = multer.memoryStorage()
@@ -473,6 +394,7 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
         }           // successful response
      })
 })
+// Teacher photo with background
 app.patch('/teacher2',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
     AWS.config.loadFromPath('./utils/aws/config.json')

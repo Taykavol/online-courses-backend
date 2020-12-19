@@ -15,7 +15,19 @@ export interface IGetUserAuthInfoRequest extends Request {
 
 const prisma = new PrismaClient()
 const app = Router();
-app.post('/notify',async (req,res)=>{
+app.get('/dollar',async (req,res)=>{
+  const dollar =  await prisma.const.findUnique({
+      where:{
+          name:"$"
+      },
+      select:{
+          value:true
+      }
+  })
+  res.json({dollar})
+  
+})
+app.post('/notifyyandexsuperwell',async (req,res)=>{
   // console.log(req)
   
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -157,6 +169,8 @@ app.post('/notify',async (req,res)=>{
       return res.status(200).send()
   }
 
+  res.status(200).send()
+
   // console.log('bodyPost',req.body)
   // console.log('Payment was succeed.Post' )
   
@@ -190,7 +204,26 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
         }
       }
   console.log(req.query.token)
+  const courseForBuy = await prisma.course.findUnique({
+      where:{
+          id:courseId
+      },
+      select:{
+          price:true
+      }
+  })
+  if(!courseForBuy) return res.json('This course did not found')
+
   var idempotenceKey = uuidv4();
+  const dollar = await prisma.const.findUnique({
+      where:{
+          name:"$",
+      },
+      select:{
+          value:true
+      }
+  })
+
   const result =  await Axios({url:'https://api.yookassa.ru/v3/payments', method:"POST", 
   auth:{
     username:"770033",
@@ -203,7 +236,7 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
   data:{
     payment_token:req.query.token,
     amount: {
-        value: '2.00',
+        value: `${+dollar*courseForBuy.price}`,
         currency: 'RUB'
     },
     confirmation: {

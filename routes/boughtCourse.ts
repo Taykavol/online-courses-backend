@@ -104,7 +104,7 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
     res.json(boughtCourse)
     // clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
 })
-// Get 1 course by CourseId
+// Get 1 course by CourseId (check, if courses bought or not)
 app.get('/course/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=> {
     const user = await prisma.user.findUnique({
         where:{
@@ -123,6 +123,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     // setTimeout(()=>{
     //     console.log('I am back in 10 seconds')
     // },10000)
+    console.log(+req.params.id)
     const boughtCourse = await prisma.boughtCourse.findUnique({
         where:{
             id:+req.params.id
@@ -151,6 +152,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
             reviewId:true
         }
     })
+    if(!boughtCourse) return res.json('Not found')
     if(req.user.id == boughtCourse.userId) return res.json(boughtCourse)
     res.json('You are not owner')
 })

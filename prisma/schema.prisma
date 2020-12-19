@@ -27,7 +27,7 @@ model instructorProfile{
   id Int @default(autoincrement()) @id
   user User @relation(fields: [userId], references: [id])
   userId Int
-  teacherName String @default("")
+  teacherName String? @default("")
   title Title?
   myCourses Course[]
   orders Order[]
@@ -42,7 +42,7 @@ model instructorProfile{
   totalReviews Int @default(0)
   // videos String[]
   paypalId String?
-  paymentMethod Payment @default(NO)
+  paymentMethod String? @default("NO")
 }
 model BoughtCourse {
   id Int @default(autoincrement()) @id
@@ -77,7 +77,7 @@ model Invoice {
   year Int 
   profile instructorProfile @relation( fields:[profileId], references:[id])
   profileId Int
-  status InvoiceStatus @default(PENDING)
+  status String? @default("PENDING")
   total Float @default(0)
   createdAt DateTime @default(now())
   @@unique([month,year,profileId])
@@ -92,10 +92,10 @@ authorId Int?
 description Json?
 forWho String? @default("")
 whatStudentsGet String? @default("")
-category Category @default(BASICS)
+category String? @default("BASICS")
 level Int[] 
 sentences String[]
-status Status? @default(BUILDING)
+status String? @default("BUILDING")
 videos String[]
 registedStudents Int @default(0)
 lessons Int?
@@ -126,36 +126,12 @@ model Review {
   reviewMessage String?
   reviewSubtitle String?
   authorName String?
+  createdAt DateTime @default(now()) 
 }
 
-
-enum Payment {
-  NO
-  PAYPAL
-  BINANCE
-}
-enum InvoiceStatus {
-  PAYOUT
-  PENDING
-}
-enum Category {
-  OPENINGS
-  MIDDLEGAME
-  ENDGAME
-  GAMES
-  BASICS
-} 
-enum Status {
-BUILDING
-VERIFYING
-PUBLISH
-UNPUBLISH
-}
-enum Level {
-  BASIC
-  INTERMEDIATE
-  ADVANCED
-  PROFESSIONAL
+model Const {
+  name String @unique
+  value String
 }
 
 enum Title {
