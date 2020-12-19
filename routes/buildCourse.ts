@@ -85,6 +85,7 @@ app.get('/newest', async (req,res)=>{
         include:{
             author:{
                 select:{
+                    id:true,
                     teacherName:true,
                     title:true,
                     aboutMe:true,
@@ -183,6 +184,7 @@ app.get('/:id/preview',async(req,res)=>{
             // },
             author:{
                 select:{
+                    id:true,
                     teacherName:true,
                     title:true,
                     registedStudents:true,

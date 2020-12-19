@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // url = "postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1"
+  // url      = env("DATABASE_URL")
+  url = "postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1"
   // url = "postgresql://postgres:3524@localhost:5432"
 }
 
