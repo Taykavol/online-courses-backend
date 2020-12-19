@@ -206,14 +206,14 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
   console.log(req.query.token)
   const courseForBuy = await prisma.course.findUnique({
       where:{
-          id:courseId
+          id:+courseId
       },
       select:{
           price:true
       }
   })
   if(!courseForBuy) return res.json('This course did not found')
-
+  console.log('Goood')
   var idempotenceKey = uuidv4();
   const dollar = await prisma.const.findUnique({
       where:{
@@ -223,6 +223,8 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
           value:true
       }
   })
+  console.log('Dollar',dollar.value)
+  console.log('price', Math.ceil(+dollar.value*courseForBuy.price))
 
   const result =  await Axios({url:'https://api.yookassa.ru/v3/payments', method:"POST", 
   auth:{
@@ -236,7 +238,7 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
   data:{
     payment_token:req.query.token,
     amount: {
-        value: `${+dollar*courseForBuy.price}`,
+        value: `${Math.ceil(+dollar.value*courseForBuy.price)}`,
         currency: 'RUB'
     },
     confirmation: {
