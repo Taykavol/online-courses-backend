@@ -56,11 +56,13 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                   amount: object.amount
               }
           })
-          console.log('confirm',confirm)
+        //   console.log('confirm',confirm)
           return res.status(200).send()
       }
       
       if(status=='succeeded') {
+            console.log('Object',object)
+
           const boughtCourse = await prisma.boughtCourse.create({
               data:{
                    user:{
@@ -90,7 +92,6 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                   }
               }
           })
-          console.log('Object',object)
           const order = await prisma.order.create({
               data:{
                   course:{
