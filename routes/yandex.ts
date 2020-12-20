@@ -90,6 +90,7 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                   }
               }
           })
+          console.log('Object',object)
           const order = await prisma.order.create({
               data:{
                   course:{
