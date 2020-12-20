@@ -111,7 +111,7 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                   },
                   price:boughtCourse.course.price,
                   paymentID:object.id,
-                  amount:object.amount.value,
+                  amount:+object.amount.value,
                   currency:object.amount.currency
               }
           })
