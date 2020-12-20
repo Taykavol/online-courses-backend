@@ -6,9 +6,18 @@ const prisma = new PrismaClient()
 const app = Router();
 
 app.get('/all', async (req,res)=>{
+    const date = new Date()
     const invoices = await prisma.invoice.findMany({
         where:{
-            status:"PENDING"
+            status:"PENDING",
+            NOT:{
+                month:{
+                    equals:date.getMonth()
+                },
+                year:{
+                    equals:date.getFullYear()
+                }
+            }
         },
         include:{
             profile:{

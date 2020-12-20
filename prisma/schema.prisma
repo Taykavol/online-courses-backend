@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // url = "postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1"
+  // url      = env("DATABASE_URL")
+  url = "postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1"
   // url = "postgresql://postgres:3524@localhost:5432"
 }
 
@@ -69,6 +69,9 @@ model Order {
   buyerId Int
   seller instructorProfile @relation(fields: [sellerId],references:[id])
   sellerId Int
+  paymentID String?
+  amount Float?
+  currency String?
   createdAt DateTime @default(now())
 }
 model Invoice {
@@ -110,7 +113,7 @@ reviewStats Int[]
 // numberReviews Int @default(0)
 curriculum String?
 reviews Review[]
-searchRating Int @default(0)
+searchRating Float @default(0)
 // totalPurchase Int @default(0)
 // totalRevenue Float @default(0)
 // forSearchEngines Float @default(0)

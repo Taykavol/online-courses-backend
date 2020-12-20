@@ -55,7 +55,7 @@ app.post('/google', async (req, res) => {
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, 'secret')
+    }, process.env.JWT_SECRET)
 
     // console.log(typeof(email),email)
     // console.log('emailData',await emailData.json())
@@ -103,7 +103,7 @@ app.post('/facebook', async (req, res) => {
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, 'secret')
+    }, process.env.JWT_SECRET)
 
     res.json({ email, role: user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null, courses:user.boughtCourses})
 
@@ -148,7 +148,7 @@ app.post('/vk', async (req, res) => {
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, 'secret')
+    }, process.env.JWT_SECRET)
 
     res.json({ email, role:user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null,courses:user.boughtCourses })
 
@@ -210,7 +210,7 @@ export default app
 //        const tokenApp=jwt.sign({
 //         id:user.id,
 //         role:user.role,
-//       },'secret')
+//       },process.env.JWT_SECRET)
 //      return res.json({email,role:user.role, token:tokenApp})
 //     }
 //     else if(!user && authType=='login') {
@@ -221,7 +221,7 @@ export default app
 //         const tokenApp=jwt.sign({
 //             id:user.id,
 //             role:user.role,
-//           },'secret')
+//           },process.env.JWT_SECRET)
 //      return  res.json({email,role:user.role, token:tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null})
 //     }
 
@@ -265,7 +265,7 @@ export default app
 //        const tokenApp=jwt.sign({
 //         id:user.id,
 //         role:user.role,
-//       },'secret')
+//       },process.env.JWT_SECRET)
 //       return res.json({email,role:"USER", token:tokenApp})
 //     }
 //     else if(!user && authType=='login') {
@@ -276,7 +276,7 @@ export default app
 //         const tokenApp=jwt.sign({
 //             id:user.id,
 //             role:user.role,
-//           },'secret')
+//           },process.env.JWT_SECRET)
 //       return  res.json({email,role:user.role, token:tokenApp})
 //     }
 //     // if(!user)
@@ -294,7 +294,7 @@ export default app
 //     // const tokenApp=jwt.sign({
 //     //     id:user.id,
 //     //     role:user.role,
-//     // },'secret')
+//     // },process.env.JWT_SECRET)
 
 //     // res.json({email,role:"USER", token:tokenApp})
 
@@ -334,7 +334,7 @@ export default app
 // const tokenApp=jwt.sign({
 //     id:user.id,
 //     role:user.role,
-// },'secret')
+// },process.env.JWT_SECRET)
 
 // res.json({email,role:"USER", token:tokenApp})
 

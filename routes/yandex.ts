@@ -107,7 +107,10 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                           id:boughtCourse.course.authorId
                       }
                   },
-                  price:boughtCourse.course.price
+                  price:boughtCourse.course.price,
+                  paymentID:object.id,
+                  amount:object.amount.value,
+                  currency:object.amount.currency
               }
           })
 
@@ -146,7 +149,7 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
                       increment:1
                   },
                   searchRating:{
-                      increment:1
+                      increment:boughtCourse.course.price/10
                   }
               }
           })
