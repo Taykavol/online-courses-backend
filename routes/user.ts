@@ -152,6 +152,7 @@ app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)
 
 app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   const {code} = req.body
+  console.log('code',code , process.env.LIVE_PAYPAL_CLIENT,process.env.LIVE_PAYPAL_SECRET,process.env.FRONTEND_URL)
   const paypal = require('paypal-rest-sdk')
   paypal.configure({
     'openid_client_id': process.env.NODE_ENV == 'production' ? process.env.LIVE_PAYPAL_CLIENT : process.env.SANDBOX_PAYPAL_CLIENT,
