@@ -20,6 +20,7 @@ module.exports = {
     env_production: {
       NODE_ENV: "production",
       FRONTEND_URL:"https://chess-courses.com",
+      BACKEND_URL:"https://api.chess-courses.com",
       SANDBOX_PAYPAL_CLIENT:"AQecO_cPaI4jsY-S7rBVo0QxhQv_NP7gzZML2kACL8P6LqDWabpeo1JfkLFuwFYl3zRG6wB7cxu2h7NO",
       SANDBOX_PAYPAL_SECRET:"EG-hodPsZAQLp-n1gCDfvOBbO0DcFpjxlErH66aoHimbxzHb2K5iDSAKcxMxBZ5CSXnN5Pm-65VWSutO",
       GOOGLE_CLIENT_ID:"231498108232-bqrk6v0pmvnm8o8igcn6en22f42g41ls.apps.googleusercontent.com",
@@ -30,7 +31,9 @@ module.exports = {
       VK_CLIENT_SECRET:"b2IxFuAeN0hKXFKIG4BC",
       s3Url:"https://chess-courses.hb.bizmrg.com",
       DATABASE_URL:"postgres://user1:35243524@rc1b-okjjh8lgsfxu3i2l.mdb.yandexcloud.net:6432/db1",
-      JWT_SECRET:'secret'
+      JWT_SECRET:'secret',
+      LIVE_PAYPAL_CLIENT:'AcKBt7lr_UgmiD9FJY6II7FQEPslK6sg-hKqdIo2PMazineptAtEWO_pxXC-TFu9RNNdAlVkeRBbTEs6',
+      LIVE_PAYPAL_SECRET:'EOJvrHGIP2dvucNtlZdVYGrJZH5TYKSLDktWpSIe-5AALs8kI9uwbhEd_m04x0HKtkK6gcNx18yMUQ1Y'
     }
   }],
 
