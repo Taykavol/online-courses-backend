@@ -1,6 +1,6 @@
 import {Request,Router } from 'express'
 import {v4 as uuidv4} from 'uuid'
-import {PrismaClient} from "@prisma/client" 
+import {Prisma, PrismaClient} from "@prisma/client" 
 import {isAuth, isInstructor , isAdmin} from '../permissions/auth'
 import AWS from "aws-sdk";
 // const AWS = require('aws-sdk');
@@ -93,9 +93,31 @@ app.get('/newest', async (req,res)=>{
                     registedStudents:true,
                     publishedCourses:true,
                 }
-            }
+            },
+        },
+        select:{
+            duration:true,
+            title:true,
+            price:true,
+            reviewStats:true,
+            averageRating:true,
+            registedStudents:true,
+            
         }
+        
     })
+    // courses.forEach(course=>{
+    //     const curriculum = JSON.parse(JSON.stringify(course.curriculum))
+    //     curriculum.forEach(chapter => {
+    //         chapter.lessons.forEach(lesson => {
+    //           delete lesson.puzzles
+    //           if(!lesson.preview) {
+    //               delete lesson.video.vimeoId
+    //           }
+    //       });  
+    //     });
+    //     course.curriculum = curriculum
+    // })
     res.json(courses)
     // clientRedis.set(req.path, JSON.stringify(courses),'EX',10)
 
@@ -196,6 +218,18 @@ app.get('/:id/preview',async(req,res)=>{
         },
 
     })
+    console.log('Hey')
+    const curriculum = JSON.parse(JSON.stringify(course.curriculum))
+    console.log(JSON.stringify(curriculum) )
+    curriculum.forEach(chapter => {
+        chapter.lessons.forEach(lesson => {
+          delete lesson.puzzles
+          if(!lesson.preview) {
+              delete lesson.video.vimeoId
+          }
+      });  
+    });
+    console.log(JSON.stringify(curriculum) )
     res.json(course)
     // clientRedis.set(req.path, JSON.stringify(course),'EX',10)
 
@@ -225,7 +259,7 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
                     id:req.user.instructorId
                 }
             },
-            curriculum: JSON.stringify(curriculum),
+            curriculum,
             reviewStats:[0,0,0,0,0],
             level:{
                 set:[1000,2900]

@@ -29,6 +29,7 @@ model instructorProfile{
   userId Int
   teacherName String? @default("")
   title Title?
+  country String? @default("NO")
   myCourses Course[]
   orders Order[]
   profit Float @default(0.5)
@@ -40,9 +41,11 @@ model instructorProfile{
   registedStudents Int @default(0)
   instructorRating Float @default(0)
   totalReviews Int @default(0)
+  contactEmail String?
   // videos String[]
   paypalId String?
   paymentMethod String? @default("NO")
+  paymentInfo Json?
 }
 model BoughtCourse {
   id Int @default(autoincrement()) @id
@@ -111,7 +114,7 @@ totalPuzzles Int @default(0)
 averageRating Float @default(0)
 reviewStats Int[]
 // numberReviews Int @default(0)
-curriculum String?
+curriculum Json?
 reviews Review[]
 searchRating Float @default(0)
 // totalPurchase Int @default(0)

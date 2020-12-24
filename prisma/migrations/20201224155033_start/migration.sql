@@ -1,19 +1,4 @@
 -- CreateEnum
-CREATE TYPE "public"."Payment" AS ENUM ('NO', 'PAYPAL');
-
--- CreateEnum
-CREATE TYPE "public"."InvoiceStatus" AS ENUM ('PAYOUT', 'PENDING');
-
--- CreateEnum
-CREATE TYPE "public"."Category" AS ENUM ('OPENINGS', 'MIDDLEGAME', 'ENDGAME', 'GAMES', 'BASICS');
-
--- CreateEnum
-CREATE TYPE "public"."Status" AS ENUM ('BUILDING', 'VERIFYING', 'PUBLISH', 'UNPUBLISH');
-
--- CreateEnum
-CREATE TYPE "public"."Level" AS ENUM ('BASIC', 'INTERMEDIATE', 'ADVANCED', 'PROFESSIONAL');
-
--- CreateEnum
 CREATE TYPE "public"."Title" AS ENUM ('GM', 'IM', 'FM', 'WGM', 'WIM');
 
 -- CreateEnum
@@ -41,6 +26,7 @@ CREATE TABLE "instructorProfile" (
     "userId" INTEGER NOT NULL,
     "teacherName" TEXT DEFAULT E'',
     "title" "Title",
+    "country" TEXT DEFAULT E'NO',
     "profit" DECIMAL(65,30) NOT NULL DEFAULT 0.5,
     "avatar" TEXT,
     "avatarBackground" TEXT,
@@ -49,8 +35,10 @@ CREATE TABLE "instructorProfile" (
     "registedStudents" INTEGER NOT NULL DEFAULT 0,
     "instructorRating" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "totalReviews" INTEGER NOT NULL DEFAULT 0,
+    "contactEmail" TEXT,
     "paypalId" TEXT,
-    "paymentMethod" "Payment" NOT NULL DEFAULT E'NO',
+    "paymentMethod" TEXT DEFAULT E'NO',
+    "paymentInfo" JSONB,
 
     PRIMARY KEY ("id")
 );
@@ -76,6 +64,9 @@ CREATE TABLE "Order" (
     "courseId" INTEGER NOT NULL,
     "buyerId" INTEGER NOT NULL,
     "sellerId" INTEGER NOT NULL,
+    "paymentID" TEXT,
+    "amount" DECIMAL(65,30),
+    "currency" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
@@ -87,7 +78,7 @@ CREATE TABLE "Invoice" (
     "month" INTEGER NOT NULL,
     "year" INTEGER NOT NULL,
     "profileId" INTEGER NOT NULL,
-    "status" "InvoiceStatus" NOT NULL DEFAULT E'PENDING',
+    "status" TEXT DEFAULT E'PENDING',
     "total" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -103,10 +94,10 @@ CREATE TABLE "Course" (
     "description" JSONB,
     "forWho" TEXT DEFAULT E'',
     "whatStudentsGet" TEXT DEFAULT E'',
-    "category" "Category" NOT NULL DEFAULT E'BASICS',
+    "category" TEXT DEFAULT E'BASICS',
     "level" INTEGER[],
     "sentences" TEXT[],
-    "status" "Status" DEFAULT E'BUILDING',
+    "status" TEXT DEFAULT E'BUILDING',
     "videos" TEXT[],
     "registedStudents" INTEGER NOT NULL DEFAULT 0,
     "lessons" INTEGER,
@@ -117,8 +108,8 @@ CREATE TABLE "Course" (
     "totalPuzzles" INTEGER NOT NULL DEFAULT 0,
     "averageRating" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "reviewStats" INTEGER[],
-    "curriculum" TEXT,
-    "searchRating" INTEGER NOT NULL DEFAULT 0,
+    "curriculum" JSONB,
+    "searchRating" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
@@ -135,6 +126,12 @@ CREATE TABLE "Review" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Const" (
+    "name" TEXT NOT NULL,
+    "value" TEXT NOT NULL
 );
 
 -- CreateIndex
@@ -160,6 +157,9 @@ CREATE UNIQUE INDEX "BoughtCourse_reviewId_unique" ON "BoughtCourse"("reviewId")
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Invoice.month_year_profileId_unique" ON "Invoice"("month", "year", "profileId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Const.name_unique" ON "Const"("name");
 
 -- AddForeignKey
 ALTER TABLE "instructorProfile" ADD FOREIGN KEY("userId")REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

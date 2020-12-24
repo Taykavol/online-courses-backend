@@ -81,12 +81,13 @@ app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)
       // TODO:Must be
       // ...profileData
       // bad
-      teacherName:{
-        set:profileData.teacherName
-      },
-      aboutMe:{
-        set:profileData.aboutMe
-      }
+      ...profileData
+      // teacherName:{
+      //   set:profileData.teacherName
+      // },
+      // aboutMe:{
+      //   set:profileData.aboutMe
+      // }
       // avatar:{
       //   set:profileData.avatar
       // },

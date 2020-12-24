@@ -5,6 +5,16 @@ import {isAuth, isInstructor , isAdmin} from '../permissions/auth'
 const app = Router()
 const prisma = new PrismaClient()
 
+
+
+  export interface IGetUserAuthInfoRequest extends Request {
+    user: {
+      id,
+      role,
+      instructorId
+    } // or any other type
+  }
+
 app.get('/all', async (req,res)=>{
   const profiles =  await prisma.instructorProfile.findMany({
         where:{
@@ -48,6 +58,19 @@ app.get('/:id', async(req,res)=>{
     console.log(profile)
     res.send(profile)
 })
-
+app.post('/payment', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
+    const {paymentInfo,paymentMethod} = req.body
+    await prisma.instructorProfile.update({
+        where:{
+            id:req.user.instructorId
+        },
+        data:{
+            paymentInfo,
+            paymentMethod
+        }
+    })
+    res.json('Ok')
+    
+})
 
 export default app
