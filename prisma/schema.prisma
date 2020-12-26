@@ -96,8 +96,8 @@ subtitle String @default("")
 author instructorProfile? @relation(fields: [authorId],references:[id])
 authorId Int?
 description Json?
-forWho String? @default("")
-whatStudentsGet String? @default("")
+// forWho String? @default("")
+// whatStudentsGet String? @default("")
 category String? @default("BASICS")
 level Int[] 
 sentences String[]

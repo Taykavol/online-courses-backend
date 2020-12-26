@@ -7,7 +7,6 @@ const clientSecret =
 let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
 let client = new paypal.core.PayPalHttpClient(environment);
 
-// const account = "sb-9ivfq2752664@business.example.com"
 
 const app = Router();
 
@@ -33,8 +32,6 @@ app.get("/", (req, res) => {
   // Call API with your client and get a response for your call
   let createOrder = async function () {
     let response = await client.execute(request);
-    // console.log(`Response: ${JSON.stringify(response)}`);
-    // If call returns body in response, you can get the deserialized version from the result attribute of the response.
     console.log(`Order: ${JSON.stringify(response.result)}`);
     res.send('')
   };

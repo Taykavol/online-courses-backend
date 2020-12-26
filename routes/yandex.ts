@@ -45,8 +45,8 @@ app.post('/notifyyandexsuperwell',async (req,res)=>{
               url:`https://api.yookassa.ru/v3/payments/${payment_id}/capture`,
               method:"POST",
               auth:{
-                  username:"770033",
-                  password:"test_j9KT3bKM3pRLIa4Nxhmd-Yf6fMMhxkPyBE4xjq1NAgw"
+                  username:process.env.YANDEX_CLIENT,
+                  password:process.env.YANDEX_SECRET
               }, 
               headers:{
                   'Idempotence-Key':idempotenceKey,
@@ -233,8 +233,8 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
 
   const result =  await Axios({url:'https://api.yookassa.ru/v3/payments', method:"POST", 
   auth:{
-    username:"770033",
-    password:"test_j9KT3bKM3pRLIa4Nxhmd-Yf6fMMhxkPyBE4xjq1NAgw"
+    username:process.env.YANDEX_CLIENT,
+    password:process.env.YANDEX_SECRET
   },
   headers:{
     'Idempotence-Key':idempotenceKey,

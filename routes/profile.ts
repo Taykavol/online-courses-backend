@@ -32,9 +32,9 @@ app.get('/all', async (req,res)=>{
             title:true,
             id:true,
             aboutMe:true,
+            country:true
         }
     })
-    console.log(profiles)
     res.send(profiles)
 })
 
@@ -53,9 +53,9 @@ app.get('/:id', async(req,res)=>{
             title:true,
             id:true,
             aboutMe:true,
+            country:true,
         }
     })
-    console.log(profile)
     res.send(profile)
 })
 app.post('/payment', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{

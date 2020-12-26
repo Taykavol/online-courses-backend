@@ -1,4 +1,4 @@
-import { json, Router } from "express";
+import { Router } from "express";
 import {PrismaClient} from "@prisma/client"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
@@ -70,33 +70,14 @@ app.get('/publicprofile/:id', async (req,res)=>{
 
 app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
   const profileData = req.body
-
-  console.log(profileData)
-
   const profile = await prisma.instructorProfile.update({
     where:{
       id:req.user.instructorId
     },
     data:{
-      // TODO:Must be
-      // ...profileData
-      // bad
       ...profileData
-      // teacherName:{
-      //   set:profileData.teacherName
-      // },
-      // aboutMe:{
-      //   set:profileData.aboutMe
-      // }
-      // avatar:{
-      //   set:profileData.avatar
-      // },
-      // title:{
-      //   set:profileData.title
-      // }
     }
   })
-  console.log(profile.teacherName)
   res.json("ok")
 } )
 // app.post("/login",async (req,res)=>{
@@ -161,7 +142,6 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
     'openid_client_secret': process.env.NODE_ENV == 'production' ?  process.env.LIVE_PAYPAL_SECRET: process.env.SANDBOX_PAYPAL_SECRET ,
     'openid_redirect_uri': `${process.env.FRONTEND_URL}/paypal/` });
   paypal.openIdConnect.tokeninfo.create(code, function(error, tokeninfo){
-    console.log(tokeninfo);
     if(!tokeninfo) return res.send('Something wrong')
     paypal.openIdConnect.userinfo.get(tokeninfo.access_token, async function(error, userinfo){
       if(error) return res.json(error)
@@ -186,10 +166,6 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
 })
 
 async function updateUserPaypalCredentials(profileId,userInfo) {
-  console.log('userInfo',userInfo)
-  console.log('',profileId)
-  // const good= JSON.parse(userInfo)
-  // console.log('good',good)
   return  prisma.instructorProfile.update({
     where:{
       id:profileId

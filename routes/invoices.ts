@@ -25,7 +25,10 @@ app.get('/all', async (req,res)=>{
                     teacherName:true,
                     title:true,
                     paymentMethod:true,
-                    paypalId:true
+                    paypalId:true,
+                    paymentInfo:true,
+                    country:true
+
                 }
             }
         }

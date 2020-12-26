@@ -42,27 +42,15 @@ const app = Router();
 // Redirect URI: parse the authorization token and ask for the access token
 app.get('/callback', async (req, res) => {
   try {
-    // console.log(req.query.code, req.query.state)
-    
-    // const userToken =req.headers.authorization && req.headers.authorization.split(' ')[1]
-    // console.log('token',userToken, req.headers)
-    // console.log(req.query.code)
     const result = await oauth2.authorizationCode.getToken({
       code: req.query.code,
       redirect_uri: redirectUri
     });
-    console.log('res',result,result.access_token);
-    // const token = oauth2.accessToken.create(result);
     const userInfo = await getUserInfo(result.access_token);
     const data = userInfo.data
     const userEmail = await getUserEmail(result.access_token);
     const email = userEmail.data.email
-    // console.log('data', data , 'email', email)
-    // console.log(data)
     const {title, id} = data
-
-    // console.log('id',id)
-    // console.log('title',title)
     const user = await prisma.user.findUnique({
       where:{
         lichessId:id 
@@ -122,7 +110,6 @@ app.get('/callback', async (req, res) => {
           id:newUser.id,
           role:"USER"
         },'secret')
-        console.log('Super',email,tokenApp)
         return res.json({email,role:"USER", token:tokenApp})
       } 
       
@@ -135,7 +122,6 @@ app.get('/callback', async (req, res) => {
     res.json({email, role:user.role,title, token:tokenApp, courses:user.boughtCourses})
 
   } catch(error) {
-    console.error('Access Token Error', error.message);
     res.status(500).json('Authentication failed');
   }
 });

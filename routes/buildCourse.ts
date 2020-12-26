@@ -2,36 +2,12 @@ import {Request,Router } from 'express'
 import {v4 as uuidv4} from 'uuid'
 import {Prisma, PrismaClient} from "@prisma/client" 
 import {isAuth, isInstructor , isAdmin} from '../permissions/auth'
-import AWS from "aws-sdk";
-// const AWS = require('aws-sdk');
-
-// import { s3 } from "aws-sdk";
-
+// import AWS from "aws-sdk";
 import multer from 'multer'
-
-// const fileStorage = multer.diskStorage({
-//     destination(req,file,cb) {
-//         cb(null,'public/images/course')
-//     },
-//     filename(req,file,cb) {
-//         cb(null,file.fieldname+req.params.id+'.jpg')
-//     }
-// })
 
 var storage = multer.memoryStorage()
 const upload2 = multer({ storage: storage }).single('image')
-// const upload = multer({ storage: fileStorage }).single('image')
 
-
-// const { promisify } = require("util");
-// const redis = require('redis')
-// const redisUrl = 'redis://localhost:6379'
-// const clientRedis = redis.createClient(redisUrl)
-// clientRedis.get = promisify(clientRedis.get)
-// import redis from 'redis'
-// const { promisify } = require("util");
-// const redisUrl = 'redis://localhost:6379'
-// const client = redis.createClient(redisUrl)
 
 const app = Router()
 
@@ -71,13 +47,7 @@ app.get('/verified', isAuth,isAdmin, async(req,res)=>{
 
 //Get all published course for main page
 app.get('/newest', async (req,res)=>{
-    // const redisCourse = await clientRedis.get(req.path)
-    //   if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     const course:JSON = JSON.parse(redisCourse)
-    //     return res.json(course)
-    //   } 
-    
+
     const courses = await prisma.course.findMany({
         where:{
             status:"PUBLISH"
@@ -95,16 +65,29 @@ app.get('/newest', async (req,res)=>{
                 }
             },
         },
-        select:{
-            duration:true,
-            title:true,
-            price:true,
-            reviewStats:true,
-            averageRating:true,
-            registedStudents:true,
-            
-        }
-        
+        // :TODO:improve algorithm
+    //     select:{
+    //         author:{
+    //             select:{
+    //                 id:true,
+    //                 teacherName:true,
+    //                 title:true,
+    //                 aboutMe:true,
+    //                 avatar:true,
+    //                 registedStudents:true,
+    //                 publishedCourses:true,
+    //             }
+    //         },
+    //         id:true,
+    //         duration:true,
+    //         title:true,
+    //         price:true,
+    //         reviewStats:true,
+    //         averageRating:true,
+    //         registedStudents:true,
+    //         sentences:true,
+    //         promoVideo:true
+    //     }
     })
     // courses.forEach(course=>{
     //     const curriculum = JSON.parse(JSON.stringify(course.curriculum))
@@ -161,11 +144,7 @@ app.get('/all',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
 })
 //Get specific course
 app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
-    // const redisCourse = await clientRedis.get(`${req.params.id}myCourse${req.user.instructorId}`)
-    // if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     return res.json(JSON.parse(redisCourse)) 
-    // }
+
     const course  = await prisma.course.findUnique({
         where:{
             id:+req.params.id
@@ -174,36 +153,15 @@ app.get('/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     if(!course) return res.json('Course not found')
     if(course.authorId!=req.user.instructorId && req.user.role!="ADMIN") return res.json('You are not owner')
     res.json(course)
-    // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(course),'EX',20)
 
 })
 // Get preview (public, for all)
 app.get('/:id/preview',async(req,res)=>{
-    // console.log(req.path)
-    // const redisCourse = await clientRedis.get(req.path)
-    //   if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     const course:JSON = JSON.parse(redisCourse)
-    //     return res.json(course)
-    //   } 
-    // const redisCourse = await clientRedis.get(`coursePreview${req.params.id}`)
-    // if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     return res.json(JSON.parse(redisCourse)) 
-    // }
     const course = await prisma.course.findUnique({
         where:{
             id:+req.params.id
         },
         include:{
-            // reviews:{
-            //     select:{
-            //         review:true,
-            //         reviewMessage:true,
-            //         reviewSubtitle:true,
-            //         authorName:true
-            //     }
-            // },
             author:{
                 select:{
                     id:true,
@@ -218,22 +176,18 @@ app.get('/:id/preview',async(req,res)=>{
         },
 
     })
-    console.log('Hey')
     const curriculum = JSON.parse(JSON.stringify(course.curriculum))
-    console.log(JSON.stringify(curriculum) )
     curriculum.forEach(chapter => {
         chapter.lessons.forEach(lesson => {
           delete lesson.puzzles
+          delete lesson.id
           if(!lesson.preview) {
               delete lesson.video.vimeoId
           }
       });  
     });
-    console.log(JSON.stringify(curriculum) )
     res.json(course)
-    // clientRedis.set(req.path, JSON.stringify(course),'EX',10)
 
-    // clientRedis.set(`coursePreview${req.params.id}`,JSON.stringify(course),'EX',20)
 
 })
 // Get reviews
@@ -262,7 +216,7 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
             curriculum,
             reviewStats:[0,0,0,0,0],
             level:{
-                set:[1000,2900]
+                set:[1000,1500]
             },
             description:[{title:'',description:''}]
         },        
@@ -330,15 +284,11 @@ app.put('/verifying/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoReques
 // Update photo.
 app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
-    // var storage = multer.memoryStorage()
-    // const {size,file} = req.body
-    console.log('Sizer',req.file)
-    // const AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
     AWS.config.loadFromPath('./utils/aws/config.json')
     const s3 = new AWS.S3({})
 
     if(req.course.pictureUri)  {
-        console.log(req.course.pictureUri)
             s3.deleteObject({
                 Bucket: "chess-courses",
                 Key:req.course.pictureUri
@@ -369,7 +319,6 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
                   }
                 }
             })
-            console.log('we are here')
             res.json({pictureUri:AWSKey});
 
         }           // successful response
@@ -378,10 +327,7 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
 // Teacher photo without background
 app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
-    // var storage = multer.memoryStorage()
-    // const {size,file} = req.body
-    console.log('Sizer',req.file)
-    // const AWS = require("aws-sdk");
+    const AWS = require("aws-sdk");
 
     AWS.config.loadFromPath('./utils/aws/config.json')
     const s3 = new AWS.S3({})
@@ -394,7 +340,6 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
         }
     })
     if(teacher.avatar)  {
-        // console.log(req.course.pictureUri)
             s3.deleteObject({
                 Bucket: "chess-courses",
                 Key:teacher.avatar
@@ -432,7 +377,7 @@ app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequ
 })
 // Teacher photo with background
 app.patch('/teacher2',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
-
+    const AWS = require("aws-sdk");
     AWS.config.loadFromPath('./utils/aws/config.json')
     const s3 = new AWS.S3({})
     const teacher = await prisma.instructorProfile.findUnique({
@@ -444,7 +389,6 @@ app.patch('/teacher2',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoReq
         }
     })
     if(teacher.avatarBackground)  {
-        // console.log(req.course.pictureUri)
             s3.deleteObject({
                 Bucket: "chess-courses",
                 Key:teacher.avatarBackground

@@ -1,17 +1,14 @@
 import {Request,Router } from 'express'
 import {PrismaClient} from "@prisma/client"
-import {isAuth, isAdmin} from '../permissions/auth'
-// const { promisify } = require("util");
-// const redis = require('redis')
-// const redisUrl = 'redis://localhost:6379'
-// const clientRedis = redis.createClient(redisUrl)
-// clientRedis.get = promisify(clientRedis.get)
+import {isAuth, isAdmin, isInstructor} from '../permissions/auth'
 
 const app = Router()
 
 export interface IGetUserAuthInfoRequest extends Request {
     user: {
-      id
+      id,
+      instructorId,
+      role
     },
     course // or any other type,
   }
@@ -29,14 +26,6 @@ prisma.$use(async (params, next) => {
 
 //Get bought courses
 app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
-    // clientRedis.flushall()
-    // const redisCourse = await clientRedis.get(`${req.user.id}${req.path}`)
-    // console.log(redisCourse)
-    // if(redisCourse) {
-    //     console.log('FROM REDIS')
-    //     const course:JSON = JSON.parse(redisCourse)
-    //     return res.json(course)
-    //   } 
     const boughtCourse = await prisma.boughtCourse.findMany({
         where:{
             userId:req.user.id
@@ -70,39 +59,7 @@ app.get('/all',isAuth,async(req:IGetUserAuthInfoRequest,res)=>{
         }
     })
 
-    // await prisma.boughtCourse.
-    // const user = await prisma.user.findUnique({
-    //     where:{
-    //         id:req.user.id
-    //     },
-    //     include:{
-    //         boughtCourses:{
-    //             select:{
-    //                 course:{
-    //                     select:{
-    //                         title:true,
-    //                         subtitle:true,
-    //                         category:true,
-    //                         lessons:true,
-    //                         duration:true,
-    //                         author:{
-    //                             select:{
-    //                                 teacherName:true,
-    //                                 title:true
-    //                             }
-    //                         }
-    //                     }
-    //                 },
-    //                 progress:true,
-    //                 review:true,
-    //                 id:true,
-    //             }
-    //         }
-    //     }
-    // })
-    // if(!user) return res.json('User not found')
     res.json(boughtCourse)
-    // clientRedis.set(`${req.user.id}${req.path}`, JSON.stringify(boughtCourse),'EX',10)
 })
 // Get 1 course by CourseId (check, if courses bought or not)
 app.get('/course/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=> {
@@ -118,12 +75,32 @@ app.get('/course/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=> {
     if(course) return res.json({body:'Course is bought, redirect'})
     res.json({error:'Try to resend request.'})
 })
+app.get('/seedcourse/:id', isAuth, isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
+    const course = await prisma.course.findUnique({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            title:true,
+            curriculum:true,
+            duration:true,
+            totalPuzzles:true,
+            author:{
+                select:{
+                    id:true,
+                    teacherName:true,
+                    title:true,
+                }
+            }
+        },
+    })
+    if(course.author.id!=req.user.instructorId) return res.json('You are not owner')
+    const boughtCourse = {course, progressOfLessons:[],progressOfPuzzles:[],reviewId:''}
+    res.json(boughtCourse)
+
+})
 // Get 1 course
 app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
-    // setTimeout(()=>{
-    //     console.log('I am back in 10 seconds')
-    // },10000)
-    console.log(+req.params.id)
     const boughtCourse = await prisma.boughtCourse.findUnique({
         where:{
             id:+req.params.id
@@ -139,7 +116,6 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
                         select:{
                             teacherName:true,
                             title:true,
-                            avatar:true
                         }
                     }
                     
@@ -187,141 +163,132 @@ app.patch('/:id', isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
     res.send('Ok')
 })
 // Buy course
-app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
-    const user = await prisma.user.findUnique({
-        where:{
-            id:req.user.id
-        },
-        include:{
-            instructorProfile:{
-                select:{
-                    myCourses:true
-                }
-            }
-        }
-        // include:{
-        //     boughtCourses:{
-        //         select:{
-        //             courseId:true
-        //         }
-        //     }
-        // }
-    })
-    if(!user) return res.json('User not found')
-    if(user.instructorProfile) {
-        if(user.instructorProfile.myCourses.find(course=>course.id==+req.params.id)) {
-            return res.send('You can not buy your course.')
-        }
-    }
-    // if(user.boughtCourses.find)
+// app.post('/:id',isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
+//     const user = await prisma.user.findUnique({
+//         where:{
+//             id:req.user.id
+//         },
+//         include:{
+//             instructorProfile:{
+//                 select:{
+//                     myCourses:true
+//                 }
+//             }
+//         }
+//     })
+//     if(!user) return res.json('User not found')
+//     if(user.instructorProfile) {
+//         if(user.instructorProfile.myCourses.find(course=>course.id==+req.params.id)) {
+//             return res.send('You can not buy your course.')
+//         }
+//     }
  
-    try {
-        const boughtCourse = await prisma.boughtCourse.create({
-            data:{
-                 user:{
-                     connect:{
-                         id:user.id
-                     }
-                 },
-                 course:{
-                     connect:{
-                         id:+req.params.id
-                     }
-                 }
-            },
-            include:{
-                course:{
-                    select:{
-                        author:{
-                            select:{
-                                profit:true,
-                            },
+//     try {
+//         const boughtCourse = await prisma.boughtCourse.create({
+//             data:{
+//                  user:{
+//                      connect:{
+//                          id:user.id
+//                      }
+//                  },
+//                  course:{
+//                      connect:{
+//                          id:+req.params.id
+//                      }
+//                  }
+//             },
+//             include:{
+//                 course:{
+//                     select:{
+//                         author:{
+//                             select:{
+//                                 profit:true,
+//                             },
                             
-                        },
-                        authorId:true,
-                        price:true,
+//                         },
+//                         authorId:true,
+//                         price:true,
                     
-                    },
-                }
-            }
-        })
-        // clientRedis.del(`coursesAll${req.user.id}`)
+//                     },
+//                 }
+//             }
+//         })
 
-        const order = await prisma.order.create({
-            data:{
-                course:{
-                    connect:{
-                        id:+req.params.id
-                    }
-                },
-                buyer:{
-                    connect:{
-                        id:user.id
-                    }
-                },
-                seller:{
-                    connect:{
-                        id:boughtCourse.course.authorId
-                    }
-                },
-                price:boughtCourse.course.price
-            }
-        })
-        const today  = new Date()
-        const invoice = await prisma.invoice.upsert({
-            create:{
-                month: today.getMonth(),
-                year:today.getFullYear(),
-                profile:{
-                    connect:{
-                    id:boughtCourse.course.authorId
-                },
+//         const order = await prisma.order.create({
+//             data:{
+//                 course:{
+//                     connect:{
+//                         id:+req.params.id
+//                     }
+//                 },
+//                 buyer:{
+//                     connect:{
+//                         id:user.id
+//                     }
+//                 },
+//                 seller:{
+//                     connect:{
+//                         id:boughtCourse.course.authorId
+//                     }
+//                 },
+//                 price:boughtCourse.course.price
+//             }
+//         })
+//         const today  = new Date()
+//         const invoice = await prisma.invoice.upsert({
+//             create:{
+//                 month: today.getMonth(),
+//                 year:today.getFullYear(),
+//                 profile:{
+//                     connect:{
+//                     id:boughtCourse.course.authorId
+//                 },
                 
-                },
-                total:boughtCourse.course.price*boughtCourse.course.author.profit
-            },
-            update:{
-                total:{
-                    increment:boughtCourse.course.price*boughtCourse.course.author.profit
-                }
-            },
-            where:{
-                month_year_profileId:{
-                    month:today.getMonth(),
-                    year:today.getFullYear(),
-                    profileId:boughtCourse.course.authorId
-                }
-            }
-        })
-        const updatedCourse = await prisma.course.update({
-            where:{
-                id:+req.params.id
-            },
-            data:{
-                registedStudents:{
-                    increment:1
-                },
-                searchRating:{
-                    increment:1
-                }
-            }
-        })
-        const updatedProfile = await prisma.instructorProfile.update({
-            where:{
-                id:boughtCourse.course.authorId
-            },
-            data:{
-                registedStudents:{
-                    increment:1
-                }
-            }
-        })
-        res.json('Good')
-    } catch (error) {
-        res.json('You already bought the course')
-    }
+//                 },
+//                 total:boughtCourse.course.price*boughtCourse.course.author.profit
+//             },
+//             update:{
+//                 total:{
+//                     increment:boughtCourse.course.price*boughtCourse.course.author.profit
+//                 }
+//             },
+//             where:{
+//                 month_year_profileId:{
+//                     month:today.getMonth(),
+//                     year:today.getFullYear(),
+//                     profileId:boughtCourse.course.authorId
+//                 }
+//             }
+//         })
+//         const updatedCourse = await prisma.course.update({
+//             where:{
+//                 id:+req.params.id
+//             },
+//             data:{
+//                 registedStudents:{
+//                     increment:1
+//                 },
+//                 searchRating:{
+//                     increment:1
+//                 }
+//             }
+//         })
+//         const updatedProfile = await prisma.instructorProfile.update({
+//             where:{
+//                 id:boughtCourse.course.authorId
+//             },
+//             data:{
+//                 registedStudents:{
+//                     increment:1
+//                 }
+//             }
+//         })
+//         res.json('Good')
+//     } catch (error) {
+//         res.json('You already bought the course')
+//     }
 
-})
+// })
 // Review course
 app.post('/:id/review',isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
 const {review,reviewMessage,authorName,reviewSubtitle} = req.body
@@ -383,7 +350,7 @@ const updatedCourse = await prisma.course.update({
             set:avgRating
         },
         searchRating:{
-            increment:(review-4)*5
+            increment:(review-4)*20
         },
         author:{
             update:{
@@ -401,8 +368,7 @@ const updatedCourse = await prisma.course.update({
 
 res.json('Good')
 })
-// Get review
-app.get('')
+
 
 
 
