@@ -94,7 +94,7 @@ app.get('/seedcourse/:id', isAuth, isInstructor, async(req:IGetUserAuthInfoReque
             }
         },
     })
-    if(course.author.id!=req.user.instructorId) return res.json('You are not owner')
+    if(!(course.author.id==req.user.instructorId||req.user.instructorId=='ADMIN')) return res.json('You are not owner')
     const boughtCourse = {course, progressOfLessons:[],progressOfPuzzles:[],reviewId:''}
     res.json(boughtCourse)
 

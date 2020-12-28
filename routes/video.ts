@@ -151,7 +151,7 @@ app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
       approach: "tus",
       size
     },
-    name:`${req.params.courseId}`
+    name:`Co${req.params.courseId}rse`
   };
   const response = await fetch("https://api.vimeo.com/me/videos", {
     method: "POST",
@@ -204,7 +204,7 @@ app.post('/promo/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
       approach: "tus",
       size
     },
-    name:`Promo${req.params.courseId}`
+    name:`Pr${req.params.courseId}omo`
   };
   const response = await fetch("https://api.vimeo.com/me/videos", {
     method: "POST",

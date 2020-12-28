@@ -205,7 +205,7 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
     // if(!req.user.instructorId) return res.json('You are not teacher')
     // TODO:After prisma will be stable to add this functional, checking for exist course status =='BUILDING'.
     // const buildingCourse = await prisma.course.findFirst({})
-    const curriculum = [{id:uuidv4(),name:"",order:0,lessons:[{order:"0",id:uuidv4(),name:"",description:"",video:{duration:"0"},puzzles:[]}]}]
+    const curriculum = [{id:uuidv4(),name:"",order:0,lessons:[{order:"0",id:uuidv4(),name:"",description:"",video:{duration:0, id:Math.random()},puzzles:[]}]}]
     const course = await prisma.course.create({
         data:{
             author:{
