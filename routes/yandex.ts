@@ -241,24 +241,28 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
     'Content-Type': 'application/json'
   },
   data:{
-    payment_token:req.query.token,
+    // payment_token:req.query.token,
     amount: {
         value: `${Math.ceil(+dollar.value*courseForBuy.price)}`,
         currency: 'RUB'
     },
+    // confirmation: {
+    //     type: 'redirect',
+    //     return_url: `${process.env.FRONTEND_URL}/coursebought/${courseId}`
+    // },
     confirmation: {
-        type: 'redirect',
-        return_url: `${process.env.FRONTEND_URL}/coursebought/${courseId}`
-    },
-    capture:true,
+        type: "embedded",
+        locale: "en_US"
+      },
+      capture: true,
     metadata:{
       courseId:courseId,
       buyerId:req.user.id
     }
   }})
-  console.log(result.data)
-    if( result.data.confirmation.confirmation_url) return res.json({confirmation_url:result.data.confirmation.confirmation_url})
-      res.json('bad')
+//   console.log(result.data)
+//     if( result.data.confirmation.confirmation_url) return res.json({confirmation_url:result.data.confirmation.confirmation_url})
+      res.json(result.data)
 })
 app.post('/ip',(req,res)=>{
     // 185.71.76.0/27
