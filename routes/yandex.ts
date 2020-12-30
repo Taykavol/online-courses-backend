@@ -250,6 +250,7 @@ app.post('/payment',isAuth, async (req:IGetUserAuthInfoRequest, res)=>{
         type: 'redirect',
         return_url: `${process.env.FRONTEND_URL}/coursebought/${courseId}`
     },
+    capture:true,
     metadata:{
       courseId:courseId,
       buyerId:req.user.id
