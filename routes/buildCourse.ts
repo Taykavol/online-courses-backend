@@ -226,15 +226,28 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
 // Update curriculum
 app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
     const data = req.body
+    const course = await prisma.course.findUnique({
+        where:{
+            id:+req.params.id
+        },
+        select:{
+            updateKey:true
+        }
+    })
+    if(data.updateKey!=course.updateKey) return res.json({error:"UpdateKey problem"})
+    data.updateKey = uuidv4()
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
         },
         data:{
             ...data
+        },
+        select:{
+            updateKey:true
         }
     }) 
-    res.json('Ok')
+    res.json(updatedCourse.updateKey)
     // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
 })
 // Publish course by Admin

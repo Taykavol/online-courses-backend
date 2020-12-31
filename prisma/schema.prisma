@@ -113,6 +113,7 @@ promoVideo String?
 totalPuzzles Int @default(0)
 averageRating Float @default(0)
 reviewStats Int[]
+updateKey String? @default("")
 // numberReviews Int @default(0)
 curriculum Json?
 reviews Review[]

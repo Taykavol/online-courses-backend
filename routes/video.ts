@@ -133,19 +133,21 @@ app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserA
 })
 
 app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
+  const {size,updateKey} = req.body 
   const course = await prisma.course.findUnique({
     where:{
       id:+req.params.courseId
     },
     select:{
       authorId:true,
-      videos:true
+      videos:true,
+      updateKey:true
     }
   })
-
+  console.log(updateKey,course.updateKey)
+  if(updateKey!=course.updateKey) return res.json({error:"Update mistake"})
   if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
   const fetch = require('node-fetch');
-  const {size} = req.body 
   let data = {
     upload: {
       approach: "tus",
