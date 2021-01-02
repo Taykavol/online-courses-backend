@@ -49,7 +49,7 @@ app.get('/',(req,res)=>{
     
 })
 
-app.use('',routerUser)
+app.use('/user',routerUser)
 app.use('/lichess',routerLichess)
 app.use('/buildcourse', buildCourse)
 app.use('/video',routeVideo)

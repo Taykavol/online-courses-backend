@@ -6,7 +6,7 @@ import {isAuth, isAdmin,isInstructor} from '../permissions/auth'
 
 //for extending classes
 import { Request } from "express"
-import { userInfo } from "os";
+// import { userInfo } from "os";
 export interface IGetUserAuthInfoRequest extends Request {
   user: {
     id,
@@ -14,11 +14,11 @@ export interface IGetUserAuthInfoRequest extends Request {
     instructorId
   } // or any other type
 }
-export interface userInfo extends Request {
-  data: {
-    payer_id
-  }
-}
+// export interface userInfo extends Request {
+//   data: {
+//     payer_id
+//   }
+// }
 
 const app = Router();
 
@@ -34,52 +34,58 @@ prisma.$use(async (params, next) => {
   return result;
 });
 
-app.get('/users',isAuth,isAdmin, async(req,res)=>{  
+app.get('/me', isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
+  const user = await prisma.user.findUnique({
+    where:{id:req.user.id},
+    select:{
+      id:true,
+      email:true,
+      // lichessId:true,
+      // googleId:true,
+      // facebookId:true,
+      // VKId:true,
+    }
+  })
+  res.json(user)
+})
+
+app.get('/all',isAuth,isAdmin, async(req,res)=>{  
     const users = await prisma.user.findMany()
     res.json(users)
 })
-
-app.get('/profile',isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
-  const profile = await prisma.instructorProfile.findUnique({
+app.put('/email', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
+  const {email} = req.body
+  await prisma.user.update({
     where:{
-      id:req.user.instructorId
-    },
-    include:{
-      myCourses:true
-    }
-  })
-  
-  res.json({...profile})
-})
-app.get('/publicprofile/:id', async (req,res)=>{
-  const profile = await prisma.instructorProfile.findUnique({
-    where:{
-      id:+req.params.id
-    },
-    select:{
-      registedStudents:true,
-      teacherName:true,
-      title:true,
-      avatar:true,
-      aboutMe:true
-    }
-  })
-
-  res.json(profile)
-})
-
-app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
-  const profileData = req.body
-  const profile = await prisma.instructorProfile.update({
-    where:{
-      id:req.user.instructorId
+      id:req.user.id
     },
     data:{
-      ...profileData
+      email
     }
-  })
-  res.json("ok")
-} )
+  }
+  )
+  res.json('Ok')
+})
+
+
+// app.get('/publicprofile/:id', async (req,res)=>{
+//   const profile = await prisma.instructorProfile.findUnique({
+//     where:{
+//       id:+req.params.id
+//     },
+//     select:{
+//       registedStudents:true,
+//       teacherName:true,
+//       title:true,
+//       avatar:true,
+//       aboutMe:true
+//     }
+//   })
+
+//   res.json(profile)
+// })
+
+
 // app.post("/login",async (req,res)=>{
 //   const { email, password } = req.body;
 //   if(!email || !password) return res.json('Info not enough')
@@ -134,7 +140,6 @@ app.post('/profile', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)
 
 app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   const {code} = req.body
-  console.log('code',code , process.env.LIVE_PAYPAL_CLIENT,process.env.LIVE_PAYPAL_SECRET,process.env.FRONTEND_URL)
   const paypal = require('paypal-rest-sdk')
   paypal.configure({
     'mode': 'live',
@@ -145,21 +150,7 @@ app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
     if(!tokeninfo) return res.send('Something wrong')
     paypal.openIdConnect.userinfo.get(tokeninfo.access_token, async function(error, userinfo){
       if(error) return res.json(error)
-      console.log('Cool')
-      console.log()
-      console.log(userinfo);
-      // userInfo.
       await updateUserPaypalCredentials(req.user.instructorId,userinfo)
-      // await prisma.instructorProfile.update({
-      //   where:{
-      //     id:req.user.instructorId
-      //   },
-      //   data:{
-      //     paypalId:{
-      //       set:userInfo.data.payer_id
-      //   }
-      // }
-      // })
       res.json(userinfo)
     });
   });

@@ -15,6 +15,19 @@ const prisma = new PrismaClient()
     } // or any other type
   }
 
+
+  app.get('/',isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
+    const profile = await prisma.instructorProfile.findUnique({
+      where:{
+        id:req.user.instructorId
+      },
+      include:{
+        myCourses:true
+      }
+    })
+    
+    res.json({...profile})
+  })
 app.get('/all', async (req,res)=>{
   const profiles =  await prisma.instructorProfile.findMany({
         where:{
@@ -58,6 +71,21 @@ app.get('/:id', async(req,res)=>{
     })
     res.send(profile)
 })
+
+app.post('/', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
+    console.log('Super!')
+    const profileData = req.body
+    const profile = await prisma.instructorProfile.update({
+      where:{
+        id:req.user.instructorId
+      },
+      data:{
+        ...profileData
+      }
+    })
+    res.json("ok")
+  } )
+
 app.post('/payment', isAuth,isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
     const {paymentInfo,paymentMethod} = req.body
     await prisma.instructorProfile.update({
