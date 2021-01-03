@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client"
 import fetch from "node-fetch"
+import expiresIn from '../utils/jwtexpire'
 // import axios from "axios"
 import jwt from "jsonwebtoken"
 
@@ -48,13 +49,21 @@ app.post('/google', async (req, res) => {
                 boughtCourses:true
             }
         })
-
-
+    // else  
+        // await prisma.user.
+    await prisma.user.update({
+        where:{
+            googleId: email
+        },
+        data:{
+            lastLogin:new Date()
+        }
+    })
     const tokenApp = jwt.sign({
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, process.env.JWT_SECRET)
+    }, process.env.JWT_SECRET, {expiresIn})
 
     res.json({ email, role: user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null,courses:user.boughtCourses })
 })
@@ -93,11 +102,19 @@ app.post('/facebook', async (req, res) => {
             }
         })
 
+        await prisma.user.update({
+            where:{
+                facebookId: id,
+            },
+            data:{
+                lastLogin:new Date()
+            }
+        })
     const tokenApp = jwt.sign({
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, process.env.JWT_SECRET)
+    }, process.env.JWT_SECRET, {expiresIn})
 
     res.json({ email, role: user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null, courses:user.boughtCourses})
 
@@ -134,11 +151,19 @@ app.post('/vk', async (req, res) => {
             }
         })
 
+        await prisma.user.update({
+            where:{
+                VKId: user_id
+            },
+            data:{
+                lastLogin:new Date()
+            }
+        })
     const tokenApp = jwt.sign({
         id: user.id,
         role: user.role,
         instructorId:user.instructorProfile?user.instructorProfile.id:null
-    }, process.env.JWT_SECRET)
+    }, process.env.JWT_SECRET, {expiresIn})
 
     res.json({ email, role:user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null,courses:user.boughtCourses })
 

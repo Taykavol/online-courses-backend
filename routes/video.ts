@@ -29,11 +29,11 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
     }
   })
 
-  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
+  if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") {console.log('wrong'); return res.json('Something wrong:(')}
 
   const videoArray = course.videos
   const index= videoArray.findIndex(videoId => videoId==req.params.vimeoId)
-  if(index==-1) return res.json('is nothing to delete')
+  if(index==-1) { return res.json('is nothing to delete')}
   //  Only admin can do
   const apiCall =  client.request({
         method:"DELETE",
@@ -43,6 +43,7 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
           console.log('error');
           console.log(error);
         } else {
+
           // console.log('body');
           // console.log(body);
         }
@@ -51,7 +52,7 @@ app.delete('/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInf
         if(status_code == 429) {
           setTimeout(()=>{
             apiCall
-          },1000)
+          },10000)
         }
 
         const videoArray = course.videos
@@ -109,10 +110,9 @@ app.delete('/promo/:vimeoId/:courseId',isAuth,isInstructor, async (req:IGetUserA
           // console.log('body');
           // console.log(body);
         }
-        console.log('status code');
-        console.log(status_code);
+
         if(status_code == 429) {
-          setTimeout(()=>{
+          return setTimeout(()=>{
             apiCall
           },100000)
         }
@@ -144,7 +144,6 @@ app.post('/video/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
       updateKey:true
     }
   })
-  console.log(updateKey,course.updateKey)
   if(updateKey!=course.updateKey) return res.json({error:"Update mistake"})
   if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
   const fetch = require('node-fetch');
@@ -200,7 +199,6 @@ app.post('/promo/:courseId',isAuth,isInstructor, async (req:IGetUserAuthInfoRequ
   if(req.user.instructorId!=course.authorId && req.user.role!="ADMIN") return res.json('Something wrong:(')
   const fetch = require('node-fetch');
   const {size} = req.body 
-  console.log(size)
   let data = {
     upload: {
       approach: "tus",

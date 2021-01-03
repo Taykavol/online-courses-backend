@@ -2,11 +2,10 @@ import jwt from 'jsonwebtoken'
 
 function isAuth(req,res,next) {
     const token =req.headers.authorization && req.headers.authorization.split(' ')[1]
-    if (!token) return res.json('Missing token')
+    if (!token) return res.status(403).json('Auth')
     jwt.verify(token, 'secret',(error,user)=>{
-      if(error) return res.json(error)
+      if(error) return res.status(403).json(error)
       req.user = user
-      console.log('User',req.user.id)
       next()
     })
   }
@@ -22,7 +21,6 @@ function isAuth(req,res,next) {
   // }
 
   function isInstructor(req,res,next) {
-    console.log(req.user.instructorId)
     if(req.user.instructorId) return next()
     res.json('You are not teacher')
   }

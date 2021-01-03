@@ -1,6 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken"
 import {PrismaClient} from "@prisma/client"
+import expiresIn from '../utils/jwtexpire'
 
 const prisma = new PrismaClient()
 const simpleOauth = require('simple-oauth2');
@@ -95,7 +96,7 @@ app.get('/callback', async (req, res) => {
           id:newUser.id,
           role:"TEACHER",
           instructorId:newUser.instructorProfile.id
-        },'secret')
+        },process.env.JWT_SECRET,{expiresIn})
         return res.json({email,role:"TEACHER", token:tokenApp})
       } else {
          newUser = await prisma.user.create({
@@ -109,7 +110,7 @@ app.get('/callback', async (req, res) => {
         const tokenApp=jwt.sign({
           id:newUser.id,
           role:"USER"
-        },'secret')
+        },process.env.JWT_SECRET, {expiresIn})
         return res.json({email,role:"USER", token:tokenApp})
       } 
       
@@ -118,7 +119,7 @@ app.get('/callback', async (req, res) => {
       id:user.id,
       role:user.role,
       instructorId:user.instructorProfile?user.instructorProfile.id:null
-    },'secret')
+    },process.env.JWT_SECRET, {expiresIn})
     res.json({email, role:user.role,title, token:tokenApp, courses:user.boughtCourses})
 
   } catch(error) {
