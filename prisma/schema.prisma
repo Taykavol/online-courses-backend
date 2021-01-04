@@ -111,6 +111,7 @@ price Float @default(20)
 orders Order[]
 pictureUri String?
 promoVideo String?
+verificationVideo String?
 totalPuzzles Int @default(0)
 averageRating Float @default(0)
 reviewStats Int[]
