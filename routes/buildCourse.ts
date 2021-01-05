@@ -4,6 +4,7 @@ import {Prisma, PrismaClient} from "@prisma/client"
 import {isAuth, isInstructor , isAdmin} from '../permissions/auth'
 // import AWS from "aws-sdk";
 import multer from 'multer'
+import Axios from 'axios'
 
 var storage = multer.memoryStorage()
 const upload2 = multer({ storage: storage }).single('image')
@@ -223,6 +224,57 @@ app.post('/create',isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=
     })
     res.json(course)
 })
+// Update thumbnail of curriculum
+app.post('/thumb/:id',isAuth,isAdmin, async(req:IGetUserAuthInfoRequest,res)=>{
+    const course = await prisma.course.findUnique({where:{
+        id:+req.params.id
+    },select:{
+        curriculum:true
+    }})
+    const curriculum = JSON.parse(JSON.stringify(course.curriculum)) 
+    for await (const chapter of curriculum) {
+        for await (const lesson of chapter.lessons ) {
+            if(lesson.video&&lesson.video.vimeoId&&!lesson.video.thumb)
+            {
+                console.log(lesson.video.vimeoId)
+               const {data} = await Axios({url:`https://api.vimeo.com/videos/${lesson.video.vimeoId}/pictures`, headers:{
+                Authorization: `Bearer ${process.env.VIMEO_ACCESS_TOKEN_UPLOAD_SCOPE}`,
+               }})
+               if(!lesson.video.thumb) {
+                   console.log(this)
+                   lesson.video.thumb = data.data[0].sizes[2].link
+                   console.log(lesson.video.thumb)
+               }
+            //    console.log(data.data[0].sizes[2].link)
+            }
+        }
+    }
+    //  curriculum.forEach(chapter => {
+    //     chapter.lessons.forEach(async lesson => {
+    //       if(lesson.video&&lesson.video.vimeoId&&!lesson.video.thumb)
+    //         {
+    //             console.log(lesson.video.vimeoId)
+    //            const {data} = await Axios({url:`https://api.vimeo.com/videos/${lesson.video.vimeoId}/pictures`, headers:{
+    //             Authorization: `Bearer ${process.env.VIMEO_ACCESS_TOKEN_UPLOAD_SCOPE}`,
+    //            }})
+    //            if(!lesson.video.thumb) {
+    //                console.log(this)
+    //                lesson.video.thumb = data.data[0].sizes[2].link
+    //                console.log(lesson.video.thumb)
+    //            }
+    //         }
+    //   });  
+    // });
+    console.log(JSON.stringify(curriculum) )
+
+    await prisma.course.update({
+        where:{id:+req.params.id},
+        data:{
+            curriculum
+        }
+    })
+    res.json('OK')
+})
 // Update curriculum
 app.put('/:id',isAuth,isInstructor,isCourseOwner, async (req:IGetUserAuthInfoRequest,res)=>{
     const data = req.body
@@ -280,13 +332,25 @@ app.put('/publish/:id', isAuth,isAdmin, async(req,res)=>{
                     publishedCourses:{
                         increment:1
                     }
-                }
+                },
             }
         }
     })
+    
 
     res.json(course)
    })
+app.put('/setbuildstatus/:id',isAuth,isAdmin, async(req:IGetUserAuthInfoRequest,res)=>{
+     await prisma.course.update({
+        where:{
+            id:+req.params.id
+        },
+        data:{
+            status:'BUILDING'
+        }
+    })
+    res.json('OK')
+})
 // Sent to verification by user.
 app.put('/verifying/:id', isAuth,isInstructor, async (req:IGetUserAuthInfoRequest,res)=>{
     const course  = await prisma.course.findUnique({
@@ -463,6 +527,9 @@ app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRe
     res.json('Ok')
     // clientRedis.set(`${req.params.id}myCourse${req.user.instructorId}`,JSON.stringify(updatedCourse),'EX',20)
 })
+
+
+// app.get((''))
 
 async function isCourseOwner(req,res,next) {
     const course  = await prisma.course.findUnique({
