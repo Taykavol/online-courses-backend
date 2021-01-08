@@ -40,6 +40,7 @@ app.get('/me', isAuth, async (req:IGetUserAuthInfoRequest,res)=>{
     select:{
       id:true,
       email:true,
+      fullname:true
       // lichessId:true,
       // googleId:true,
       // facebookId:true,
@@ -65,6 +66,20 @@ app.put('/email', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
   }
   )
   res.json('Ok')
+})
+app.put('/fullname', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
+  const {fullname} = req.body
+  await prisma.user.update({
+    where:{
+      id:req.user.id
+    },
+    data:{
+      fullname
+    }
+  }
+  )
+  res.json('Ok')
+
 })
 
 

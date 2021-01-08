@@ -21,6 +21,7 @@ model User {
   boughtCourses BoughtCourse[] 
   isBanned Boolean @default(false)
   instructorProfile instructorProfile?
+  fullname String? @default("")
   lastLogin DateTime @default(now())
   createdAt DateTime @default(now())
 }

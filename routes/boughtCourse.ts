@@ -107,6 +107,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
         },
         select:{
             course:{
+                
                 select:{
                     title:true,
                     curriculum:true,
@@ -122,6 +123,7 @@ app.get('/:id',isAuth, async(req:IGetUserAuthInfoRequest, res)=>{
                 }
                 
             },
+            id:true,
             userId:true,
             progressOfLessons:true,
             progressOfPuzzles:true,

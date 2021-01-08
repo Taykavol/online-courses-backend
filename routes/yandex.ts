@@ -29,10 +29,12 @@ app.get('/dollar',async (req,res)=>{
 })
 app.post('/notifyyandexsuperwell',async (req,res)=>{
   // console.log(req)
-  
+//   const {data} = req.body
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   console.log('ip', ip)
   const {object} = req.body
+//   return res.send(object)
+
   const payment_id = object.id
   const status = object.status
   const idempotenceKey = uuidv4();

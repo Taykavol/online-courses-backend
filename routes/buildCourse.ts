@@ -518,6 +518,8 @@ app.patch('/teacher2',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoReq
 // Update course info
 app.patch('/:id',isAuth,isInstructor,isCourseOwner,async (req:IGetUserAuthInfoRequest,res)=>{
     const data = req.body
+    if(data.price<10) data.price = 10
+    if(data.price>99) data.price = 99
     const updatedCourse = await prisma.course.update({
         where:{
             id:+req.params.id
