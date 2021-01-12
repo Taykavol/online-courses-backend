@@ -8,6 +8,7 @@ import Axios from 'axios'
 
 var storage = multer.memoryStorage()
 const upload2 = multer({ storage: storage }).single('image')
+const upload3 = multer({ storage: storage }).single('ebook')
 
 
 const app = Router()
@@ -418,6 +419,73 @@ app.patch('/:id/photo',isAuth,isInstructor,isCourseOwner,upload2, async(req:IGet
         }           // successful response
      })
 })
+
+// Ebook
+app.patch('/:id/ebook',isAuth,isInstructor,isCourseOwner,upload3, async(req:IGetUserAuthInfoRequest,res)=>{
+
+    const AWS = require("aws-sdk");
+    AWS.config.loadFromPath('./utils/aws/config.json')
+    const s3 = new AWS.S3({})
+    if(req.course.eBook)  {
+            s3.deleteObject({
+                Bucket: "chess-courses",
+                Key:req.course.eBook
+            },(err,data)=>{
+                console.log(err)
+                console.log('was deleted')
+                console.log(data)
+            })
+    }
+    const AWSKey = `ebook/${uuidv4()}ebook${req.params.id}.pdf`
+    s3.putObject({
+        Body: req.file.buffer,
+        Bucket: "chess-courses",
+        Key: AWSKey,
+        ContentType:"application/pdf",
+        ACL: 'public-read',
+        CacheControl:"max-age=2628000"
+     }, async function(err, data){
+        if (err) throw err; // an error occurred
+        else  {
+            await prisma.course.update({
+                where:{
+                    id:+req.params.id
+                },
+                data:{
+                  eBook:AWSKey
+                }
+            })
+            res.json({pictureUri:AWSKey});
+
+        }           // successful response
+     })
+})
+// Delete Ebook
+app.delete('/:id/ebook',isAuth,isInstructor,isCourseOwner,async(req:IGetUserAuthInfoRequest,res)=>{
+
+    const AWS = require("aws-sdk");
+    AWS.config.loadFromPath('./utils/aws/config.json')
+    const s3 = new AWS.S3({})
+    if(req.course.eBook)  {
+            s3.deleteObject({
+                Bucket: "chess-courses",
+                Key:req.course.eBook
+            },(err,data)=>{
+                console.log(err)
+                console.log('was deleted')
+                console.log(data)
+            })
+        const course = await prisma.course.update({
+            where:{
+                id:+req.params.id
+            },
+            data:{
+                eBook:''
+            }
+        })
+    }
+    res.json('OK')
+})
 // Teacher photo without background
 app.patch('/teacher',isAuth,isInstructor,upload2, async(req:IGetUserAuthInfoRequest,res)=>{
 
@@ -540,7 +608,8 @@ async function isCourseOwner(req,res,next) {
         },
         select:{
             authorId:true,
-            pictureUri:true
+            pictureUri:true,
+            eBook:true
         }
     })
     if(!course) return res.json('Course not found')

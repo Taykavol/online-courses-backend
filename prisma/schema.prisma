@@ -98,6 +98,7 @@ subtitle String @default("")
 author instructorProfile? @relation(fields: [authorId],references:[id])
 authorId Int?
 description Json?
+eBook String?
 // forWho String? @default("")
 // whatStudentsGet String? @default("")
 category String? @default("BASICS")
