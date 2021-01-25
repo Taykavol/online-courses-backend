@@ -38,6 +38,7 @@ app.get('/all',isAuth, isInstructor, async(req:IGetUserAuthInfoRequest,res)=>{
             //     gte: new Date(`${todayMonth} 1, ${todayYear}`),
             //     lte: new Date(`${(todayMonth)%12+1} 1, ${(todayMonth)%12+1>todayMonth?todayYear:todayYear+1}`)
             // }
+            
         },
         select:{
             price:true,
