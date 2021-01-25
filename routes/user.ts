@@ -101,57 +101,8 @@ app.put('/fullname', isAuth, async(req:IGetUserAuthInfoRequest,res)=>{
 // })
 
 
-// app.post("/login",async (req,res)=>{
-//   const { email, password } = req.body;
-//   if(!email || !password) return res.json('Info not enough')
-//   const user = await prisma.user.findOne({
-//     where: {
-//       email
-//     },
-//     include:{
-//       instructorProfile:true
-//     }
-//   })
-//   if(!user) return res.json({error:'Email or password are incorrect'})
-//   const id = user.id
-//   const role = user.role
-  
-//   console.log(role)
-//   const isMatch = await bcrypt.compare(password,user.password)
-//   console.log(isMatch)
-//   if(!isMatch) return res.json('Password incorrect')
-//   const token=jwt.sign({id,role,instructorId:user.instructorProfile.id},'secret')
-//   res.json({token, user:{role,email}})
-  
-// })
-// app.post("/signup", async (req, res) => {
-//   const { email, password } = req.body;
-//   console.log(email,password)
-//   if(!email || !password) return res.json('Info not enough')
-//   const isUserExist = await prisma.user.findOne({
-//     where:{
-//      email
-//     }
-//   })
-//   if(isUserExist) return res.json('User with this email exists')
-//   const hashedPassword =await bcrypt.hash(password,10)
 
-//   const {id,role} = await prisma.user.create({
-//     data: {
-//       email,
-//       password:hashedPassword,
-//       role:"USER"
-//     }
-//   })
-  
-//   const token=jwt.sign({
-//     id,
-//     role
-//   },'secret')
 
-//   res.json({token, user:{role:"USER",email}})
-
-// });
 
 app.post("/paypal", isAuth,isInstructor,  (req:IGetUserAuthInfoRequest,res)=>{
   const {code} = req.body

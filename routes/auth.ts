@@ -2,6 +2,7 @@ import { Router } from "express";
 import { PrismaClient } from "@prisma/client"
 import fetch from "node-fetch"
 import expiresIn from '../utils/jwtexpire'
+import bcrypt from 'bcrypt'
 // import axios from "axios"
 import jwt from "jsonwebtoken"
 
@@ -166,6 +167,53 @@ app.post('/vk', async (req, res) => {
     }, process.env.JWT_SECRET, {expiresIn})
 
     res.json({ email, role:user.role, token: tokenApp, instructorId:user.instructorProfile?user.instructorProfile.id:null,courses:user.boughtCourses })
-
 })
+
+app.post("/signup", async (req, res) => {
+    const { email, password } = req.body;
+    console.log(email,password)
+    if(!email || !password) return res.json({error:'Info not enough'})
+    const isUserExist = await prisma.user.findUnique({
+      where:{
+       login:email
+      }
+    })
+    if(isUserExist) return res.json({error:'User with this email exists'})
+    const hashedPassword =await bcrypt.hash(password,10)
+  
+    const {id,role} = await prisma.user.create({
+      data: {
+        login:email,
+        password:hashedPassword,
+        role:"USER"
+      }
+    })
+    
+    const token=jwt.sign({
+      id,
+      role
+    },process.env.JWT_SECRET, {expiresIn})
+    res.json({token, user:{role:"USER",email}})
+  });
+
+  app.post("/login",async (req,res)=>{
+    const { email, password } = req.body;
+    if(!email || !password) return res.json({error:'Info not enough'})
+    const user = await prisma.user.findUnique({
+      where: {
+        login:email
+      },
+      include:{
+        instructorProfile:true
+      }
+    })
+    if(!user) return res.json({error:'Email or password are incorrect'})
+    const id = user.id
+    const role = user.role
+    const isMatch = await bcrypt.compare(password,user.password)
+    if(!isMatch) return res.json({error:'Password incorrect'})
+    const token=jwt.sign({id,role,instructorId:user.instructorProfile?user.instructorProfile.id:null},process.env.JWT_SECRET, {expiresIn})
+    res.json({token, user:{role,email}})
+    
+  })
 export default app
